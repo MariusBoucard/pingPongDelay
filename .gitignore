@@ -1,0 +1,72 @@
+# JUCE build directories
+Builds/
+JuceLibraryCode/
+
+# Binary and intermediate files
+*.dll
+*.exe
+*.o
+*.a
+*.d
+*.lib
+*.exp
+*.intermediate
+*.ipa
+*.plist
+*.png
+*.svg
+
+# Visual Studio cache and build directories
+**/.vs/
+**/x64/
+**/x86/
+**/Debug/
+**/Release/
+*.sdf
+*.opensdf
+*.suo
+*.user
+*.ncb
+*.VC.db
+*.VC.opendb
+*.VC.db-shm
+*.VC.db-wal
+*.VC.VC.opendb
+*.VC.VC.db
+*.VC.VC.db-shm
+*.VC.VC.db-wal
+
+# Xcode cache and build directories
+*.mode1v3
+*.pbxuser
+!default.pbxuser
+*.perspectivev3
+!default.perspectivev3
+*.xcworkspace
+!default.xcworkspace
+xcuserdata
+DerivedData/
+
+# Mac OS X
+.DS_Store
+*.swp
+
+# Other
+*.log
+*.bak
+*.autosave
+*.orig
+*.rej
+*.swp
+*.kate-swp
+*.tmp
+*.tmp.*
+*~ 
+*.sublime-project
+*.sublime-workspace
+*.idea/
+*.vscode/
+*.tags*
+cscope.*
+nbproject/
+template.jucer
