@@ -337,7 +337,23 @@ void DelayAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer, juce::M
     }
 
     updateDelayParameters();
+    if(getPlayHead() != nullptr){
 
+            double value = getPlayHead()->getPosition()->getTimeInSeconds().orFallback(0.0);
+            pan = std::sin( value);
+            // double delta = std::fmod(value, (*parameters.getRawParameterValue("delaytime") / 1000.0f))/ (*parameters.getRawParameterValue("delaytime") /1000.0f);               //double position = getPlayHead()->getPosition()->getPpqPosition().orFallback(0.0);
+
+                // double lastBeatPosition = getPlayHead()->getPosition()->getPpqPositionOfLastBarStart().orFallback(0.0);
+                //   double beatTime =  60.0f/ getPlayHead()->getPosition()->getBpm().orFallback(0.0);
+                //   double lastBeatTime = beatTime * lastBeatPosition;
+                //         double delta = (value - lastBeatTime)/beatTime;
+ 
+
+
+
+                // Do something with the bar position value...
+                // pan = delta*2.0f - 1.0f;
+    }
     analyserOutput->pushSamples(buffer);
 }
 
@@ -346,7 +362,7 @@ void DelayAudioProcessor::updateDelayParameters()
      float delay =    *parameters.getRawParameterValue("delaytime");
  float feedback = *parameters.getRawParameterValue("feedback");
  float gain = *parameters.getRawParameterValue("gain");
- float pan = *parameters.getRawParameterValue("pan");
+//  float pan = *parameters.getRawParameterValue("pan");
 
 auto gainProcessor = dynamic_cast<GainProcessor*>(gainNode->getProcessor());
 if (gainProcessor != nullptr) {
@@ -356,7 +372,7 @@ auto delayProcessor = dynamic_cast<DelayPingPongProcessor*>(delayNode->getProces
 if (delayProcessor != nullptr) {
     delayProcessor->setDelay(delay);
      delayProcessor->setFeedBack(feedback);
-    //delayProcessor->setPan(pan);
+    delayProcessor->setPan(pan);
 }
 auto mixerProcessor = dynamic_cast<DryWetMixer*>(mixerNode->getProcessor());
 if(mixerProcessor != nullptr){
