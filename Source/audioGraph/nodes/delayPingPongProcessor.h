@@ -51,8 +51,8 @@ public:
 
         
         // Calculate left and right volume multipliers based on pan value
-        float leftVol = pan <= 0.0f ? 1.0f : 1.0f - pan;
-        float rightVol = pan >= 0.0f ? 1.0f : 1.0f + pan;
+        float leftVol = pan <= 0.0f ? 1.0f : 1.0f - pan*width;
+        float rightVol = pan >= 0.0f ? 1.0f : 1.0f + pan*width;
 
         // Apply panning to the audio data
         for (int i = 0; i < buffer.getNumSamples(); ++i)
@@ -98,6 +98,8 @@ public:
     void setPan(float newGain) {
          pan = newGain; 
          }
+
+    void setWidth(float newWidth) { width = newWidth; }
     void getStateInformation (juce::MemoryBlock& destData) override {}
     void setStateInformation (const void* data, int sizeInBytes) override {}
 
@@ -107,4 +109,5 @@ private:
     float feedback = 0.5f;
     float pan = 0.0f;
     float delta = 0.0f;
+    float width = 0.0f;
 };

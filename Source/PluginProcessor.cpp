@@ -26,7 +26,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
     layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"feedback", 1}, "FeedBack", 0.0f, 1.0f, 0.5f));
     layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"delaytime", 1}, "Delay Time", 1.0f, 2000.0f, 500.0f));
        layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"mix", 1}, "Mix", 0.0f, 1.0f, 0.5f));
-       layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"pan", 1}, "Pan", -1.0f, 1.0f, 0.0f));
+       layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"width", 1}, "Width", 0, 1.0f, 0.0f));
 
     return layout;
 }
@@ -362,6 +362,7 @@ void DelayAudioProcessor::updateDelayParameters()
      float delay =    *parameters.getRawParameterValue("delaytime");
  float feedback = *parameters.getRawParameterValue("feedback");
  float gain = *parameters.getRawParameterValue("gain");
+ float width = *parameters.getRawParameterValue("width");
 //  float pan = *parameters.getRawParameterValue("pan");
 
 auto gainProcessor = dynamic_cast<GainProcessor*>(gainNode->getProcessor());
@@ -373,6 +374,7 @@ if (delayProcessor != nullptr) {
     delayProcessor->setDelay(delay);
      delayProcessor->setFeedBack(feedback);
     delayProcessor->setPan(pan);
+    delayProcessor->setWidth(width);
 }
 auto mixerProcessor = dynamic_cast<DryWetMixer*>(mixerNode->getProcessor());
 if(mixerProcessor != nullptr){
