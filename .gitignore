@@ -69,4 +69,5 @@ DerivedData/
 *.tags*
 cscope.*
 nbproject/
+delay.jucer
 template.jucer

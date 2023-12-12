@@ -103,6 +103,13 @@ public:
     void getStateInformation (juce::MemoryBlock& destData) override {}
     void setStateInformation (const void* data, int sizeInBytes) override {}
 
+// TODO : handle the logic to get the input from GUI and convert it to the right value for the DSP
+    void setTimeFromNote(float noteType){
+        
+        delay = noteType;
+    }
+
+
 private:
     EchoMonoToStereo fDSP;
     float delay = 0.5f;

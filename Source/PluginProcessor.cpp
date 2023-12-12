@@ -19,14 +19,17 @@
 
 juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
 {
-
     juce::AudioProcessorValueTreeState::ParameterLayout layout;
-    // layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"inputVolume", 1}, "Input Volume", 0.0f, 100.0f, 50.0f));
+    // Add a ComboBox parameter for the slider
+    juce::StringArray sliderValues = { "1/2", "1/4", "1/8", "1/16", "1/32" };
+    layout.add(std::make_unique<juce::AudioParameterChoice>(juce::ParameterID{"notesLength", 1}, "note Time", sliderValues, 0));
+
+    // Add other parameters...
     layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"gain", 1}, "Gain", 0.0f, 1.0f, 0.0f));
     layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"feedback", 1}, "FeedBack", 0.0f, 1.0f, 0.5f));
     layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"delaytime", 1}, "Delay Time", 1.0f, 2000.0f, 500.0f));
-       layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"mix", 1}, "Mix", 0.0f, 1.0f, 0.5f));
-       layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"width", 1}, "Width", 0, 1.0f, 0.0f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"mix", 1}, "Mix", 0.0f, 1.0f, 0.5f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"width", 1}, "Width", 0, 1.0f, 0.0f));
 
     return layout;
 }
