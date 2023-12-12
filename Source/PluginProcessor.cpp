@@ -341,7 +341,7 @@ void DelayAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer, juce::M
 
             double value = getPlayHead()->getPosition()->getTimeInSeconds().orFallback(0.0);
             pan = std::sin( value);
-            double delta = std::fmod(value, (*parameters.getRawParameterValue("delaytime") / 1000.0f))/ (*parameters.getRawParameterValue("delaytime") /1000.0f);               //double position = getPlayHead()->getPosition()->getPpqPosition().orFallback(0.0);
+            double delta = std::fmod( ((*parameters.getRawParameterValue("delaytime") / 1000.0f))*0.5f+value, (*parameters.getRawParameterValue("delaytime") / 1000.0f))/ (*parameters.getRawParameterValue("delaytime") /1000.0f);               //double position = getPlayHead()->getPosition()->getPpqPosition().orFallback(0.0);
 
                 // double lastBeatPosition = getPlayHead()->getPosition()->getPpqPositionOfLastBarStart().orFallback(0.0);
                 //   double beatTime =  60.0f/ getPlayHead()->getPosition()->getBpm().orFallback(0.0);
@@ -352,7 +352,7 @@ void DelayAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer, juce::M
 
 
                 // Do something with the bar position value...
-                // pan = delta*2.0f - 1.0f;
+                 pan = delta*2.0f - 1.0f;
     }
     analyserOutput->pushSamples(buffer);
 }
