@@ -11,6 +11,7 @@
 #include "resources/CompressionValue.h"
 #include "faustDSP/FaustEffect.h"
 #include "audioGraph/nodes/delayProcessor.h"
+#include "audioGraph/nodes/delayPingPongProcessor.h"
 #include "audioGraph/nodes/gainProcessor.h"
 #include "audioGraph/nodes/DryWetMixer.h"
 #include "Components/LissajourComponent.h"
@@ -23,8 +24,9 @@ juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
     // layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"inputVolume", 1}, "Input Volume", 0.0f, 100.0f, 50.0f));
     layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"gain", 1}, "Gain", 0.0f, 1.0f, 0.0f));
     layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"feedback", 1}, "FeedBack", 0.0f, 1.0f, 0.5f));
-    layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"delaytime", 1}, "Delay Time", 1.0f, 1000.0f, 500.0f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"delaytime", 1}, "Delay Time", 1.0f, 2000.0f, 500.0f));
        layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"mix", 1}, "Mix", 0.0f, 1.0f, 0.5f));
+       layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"pan", 1}, "Pan", -1.0f, 1.0f, 0.0f));
 
     return layout;
 }
@@ -82,7 +84,7 @@ void DelayAudioProcessor::connectNodes()
 
     // Add the processor to the graph and get the node
     gainNode = audioGraph.addNode(std::move(gainProcessor));
-    std::unique_ptr<juce::AudioProcessor> delayProcessor = std::make_unique<DelayProcessor>();
+    std::unique_ptr<juce::AudioProcessor> delayProcessor = std::make_unique<DelayPingPongProcessor>();
 
     // Add the processor to the graph and get the node
     delayNode = audioGraph.addNode(std::move(delayProcessor));
@@ -116,7 +118,7 @@ void DelayAudioProcessor::connectNodes()
     // Connect the last node to the output
     if (delayNode != nullptr && gainNode != nullptr)
     {
-        for (int channel = 0; channel < getTotalNumOutputChannels(); ++channel)
+        for (int channel = 0; channel < getTotalNumInputChannels(); ++channel)
         {
             juce::AudioProcessorGraph::Connection connection;
             connection.source = {gainNode->nodeID, channel};
@@ -152,7 +154,7 @@ if(inputNode != nullptr && mixerNode != nullptr)
         connection.destination = {mixerNode->nodeID, channel};
 
         audioGraph.addConnection(connection);
-             juce::AudioProcessorGraph::Connection connectionOut;
+         juce::AudioProcessorGraph::Connection connectionOut;
         connectionOut.source = {delayNode->nodeID, channel};
         connectionOut.destination = {mixerNode->nodeID, 2+channel};
         audioGraph.addConnection(connectionOut);
@@ -341,17 +343,20 @@ void DelayAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer, juce::M
 
 void DelayAudioProcessor::updateDelayParameters()
 {
-     float delay =    *parameters.getRawParameterValue("delaytime")/1000.0f;
+     float delay =    *parameters.getRawParameterValue("delaytime");
  float feedback = *parameters.getRawParameterValue("feedback");
  float gain = *parameters.getRawParameterValue("gain");
+ float pan = *parameters.getRawParameterValue("pan");
+
 auto gainProcessor = dynamic_cast<GainProcessor*>(gainNode->getProcessor());
 if (gainProcessor != nullptr) {
     gainProcessor->setGain(gain);
 }
-auto delayProcessor = dynamic_cast<DelayProcessor*>(delayNode->getProcessor());
+auto delayProcessor = dynamic_cast<DelayPingPongProcessor*>(delayNode->getProcessor());
 if (delayProcessor != nullptr) {
     delayProcessor->setDelay(delay);
      delayProcessor->setFeedBack(feedback);
+    //delayProcessor->setPan(pan);
 }
 auto mixerProcessor = dynamic_cast<DryWetMixer*>(mixerNode->getProcessor());
 if(mixerProcessor != nullptr){

@@ -11,10 +11,7 @@
 #include "resources/HorizontalLineSource.h"
 #include "resources/CompressionValue.h"
 #include "faustDSP/FaustEffect.h"
-    // using AudioGraphIOProcessor = juce::AudioProcessorGraph::AudioGraphIOProcessor;
-    // using Node = juce::AudioProcessorGraph::Node;
-
-// #include "ThreasholdLineSource.h"
+ 
 //==============================================================================
 
 class DelayAudioProcessor  : public foleys::MagicProcessor

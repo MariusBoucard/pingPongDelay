@@ -2,9 +2,9 @@
 
 <JUCERPROJECT id="Sx09LV" name="Template" projectType="audioplug" useAppConfig="0"
               addUsingNamespaceToJuceHeader="0" displaySplashScreen="1" jucerFormatVersion="1"
-              pluginFormats="buildStandalone" pluginName="Ballzzy's Template"
-              headerPath="&#10;C:\Program\ Files\Faust\include\**&#10;" companyName="Ballzzy and Josip"
-              pluginVST3Category="Fx">
+              pluginName="Ballzzy's Template" headerPath="&#10;C:\Program\ Files\Faust\include\**&#10;"
+              companyName="Ballzzy and Josip" pluginVST3Category="Fx" pluginCode="caca"
+              pluginFormats="buildVST3">
   <MAINGROUP id="oXUuYS" name="Template">
     <GROUP id="{B89B3AD5-672E-35AE-9240-8A0B1C0D04FE}" name="New Group"/>
     <GROUP id="{0F9FA3F7-84DA-F429-6784-0B979A73E54A}" name="New Group"/>
@@ -22,7 +22,10 @@
         </GROUP>
       </GROUP>
       <GROUP id="{7129F463-6DC7-1224-99AF-4C78ACD2D148}" name="faustDSP">
+        <FILE id="zDAKuc" name="EchoMonoToStereo.h" compile="0" resource="0"
+              file="Source/faustDSP/EchoMonoToStereo.h"/>
         <FILE id="A0HZcg" name="FaustEffect.h" compile="0" resource="0" file="Source/faustDSP/FaustEffect.h"/>
+        <FILE id="thDtN7" name="Echo.h" compile="0" resource="0" file="Source/faustDSP/Echo.h"/>
         <FILE id="ekLxla" name="PingPongFaust.cpp" compile="1" resource="0"
               file="Source/faustDSP/PingPongFaust.cpp"/>
       </GROUP>
