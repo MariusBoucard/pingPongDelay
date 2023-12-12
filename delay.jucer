@@ -68,7 +68,7 @@
   <EXPORTFORMATS>
     <VS2022 targetFolder="Builds/VisualStudio2022">
       <CONFIGURATIONS>
-        <CONFIGURATION isDebug="1" name="Debug" targetName="PingPong Debug" binaryPath="C:\Users\mariu\Documents\VST\vstDev\"/>
+        <CONFIGURATION isDebug="1" name="Debug" targetName="PingPong Debug" binaryPath="D:\Projets musique\vst\JosipAndBallzzy"/>
         <CONFIGURATION isDebug="0" name="Release" targetName="PingPongDelay"/>
       </CONFIGURATIONS>
       <MODULEPATHS>

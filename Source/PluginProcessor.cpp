@@ -21,8 +21,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
 {
     juce::AudioProcessorValueTreeState::ParameterLayout layout;
     // Add a ComboBox parameter for the slider
-    juce::StringArray sliderValues = { "1/2", "1/4", "1/8", "1/16", "1/32" };
-    layout.add(std::make_unique<juce::AudioParameterChoice>(juce::ParameterID{"notesLength", 1}, "note Time", sliderValues, 0));
+    layout.add(std::make_unique<juce::AudioParameterChoice>(juce::ParameterID{"noteslength", 1}, "note Time",notesValues, 0));
 
     // Add other parameters...
     layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"gain", 1}, "Gain", 0.0f, 1.0f, 0.0f));
@@ -114,7 +113,6 @@ void DelayAudioProcessor::connectNodes()
             juce::AudioProcessorGraph::Connection connection;
             connection.source = {inputNode->nodeID, channel};
             connection.destination = {gainNode->nodeID, channel};
-
             audioGraph.addConnection(connection);
         }
     }
@@ -338,9 +336,10 @@ void DelayAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer, juce::M
         // Process the audio data with the Faust DSP object
         //     fDSP.compute(buffer.getNumSamples(), const_cast<float**>(inputChannelData), outputChannelData);
     }
+    double bpm =100.0f;
 
-    updateDelayParameters();
     if(getPlayHead() != nullptr){
+         bpm = getPlayHead()->getPosition()->getBpm().orFallback(0.0);
 
             double value = getPlayHead()->getPosition()->getTimeInSeconds().orFallback(0.0);
             pan = std::sin( value);
@@ -356,16 +355,29 @@ void DelayAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer, juce::M
 
                 // Do something with the bar position value...
                  pan = delta*2.0f - 1.0f;
+
     }
+    pan = 0.0f;
+                 updateDelayParameters(bpm);
     analyserOutput->pushSamples(buffer);
 }
 
-void DelayAudioProcessor::updateDelayParameters()
+void DelayAudioProcessor::updateDelayParameters(float bpm)
 {
      float delay =    *parameters.getRawParameterValue("delaytime");
  float feedback = *parameters.getRawParameterValue("feedback");
  float gain = *parameters.getRawParameterValue("gain");
  float width = *parameters.getRawParameterValue("width");
+string notesLength = "1/4";
+auto param = dynamic_cast<juce::AudioParameterChoice*>(parameters.getParameter("noteslength"));
+if (param != nullptr)
+{
+    int selectedIndex = param->getIndex();
+    // Do something with selectedIndex...
+    notesLength = param->choices[selectedIndex].toStdString( );
+}
+
+
 //  float pan = *parameters.getRawParameterValue("pan");
 
 auto gainProcessor = dynamic_cast<GainProcessor*>(gainNode->getProcessor());
@@ -374,10 +386,11 @@ if (gainProcessor != nullptr) {
 }
 auto delayProcessor = dynamic_cast<DelayPingPongProcessor*>(delayNode->getProcessor());
 if (delayProcessor != nullptr) {
-    delayProcessor->setDelay(delay);
+   //  delayProcessor->setDelay(delay);
      delayProcessor->setFeedBack(feedback);
     delayProcessor->setPan(pan);
     delayProcessor->setWidth(width);
+    delayProcessor->setNotesLength(notesLength, bpm);
 }
 auto mixerProcessor = dynamic_cast<DryWetMixer*>(mixerNode->getProcessor());
 if(mixerProcessor != nullptr){

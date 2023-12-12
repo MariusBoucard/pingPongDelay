@@ -104,9 +104,24 @@ public:
     void setStateInformation (const void* data, int sizeInBytes) override {}
 
 // TODO : handle the logic to get the input from GUI and convert it to the right value for the DSP
-    void setTimeFromNote(float noteType){
-        
-        delay = noteType;
+    void setNotesLength(string noteTyp, float bpm){
+        bpm = 100.0f;
+        float quarterNote = (60.0f / bpm) *1000;
+
+        if (noteTyp == "1/2"){
+                delay = quarterNote*2;
+                } else if (noteTyp == "1/4"){   
+                delay = quarterNote;
+                } else if (noteTyp == "1/8"){
+                delay = quarterNote/2;
+                } else if (noteTyp == "1/16"){
+                delay = quarterNote/4;
+                } else if (noteTyp == "1/32"){
+                delay = quarterNote/8;
+                } else {
+                delay = quarterNote;
+                }
+
     }
 
 
