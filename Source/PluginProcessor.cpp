@@ -27,7 +27,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
 
     // Add other parameters...
     layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"gain", 1}, "Gain", 0.0f, 1.0f, 0.0f));
-    layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"feedback", 1}, "FeedBack", 0.0f, 1.0f, 0.5f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"feedback", 1}, "FeedBack", 0.0f, 0.99f, 0.5f));
     layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"delaytime", 1}, "Delay Time", 1.0f, 2000.0f, 500.0f));
     layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"mix", 1}, "Mix", 0.0f, 1.0f, 0.5f));
     layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"width", 1}, "Width", 0, 1.0f, 0.0f));
@@ -247,7 +247,6 @@ float computePan(float bpm,float ppqPosition,float ppqMesure,float timeSecond ,s
     double beatTime = 60.0f / bpm;
     double timeMesure = ppqMesure * beatTime;
     double pan = 0.0f;
-    return pan;
 
     if(panType == "linear"){
             double delta = (timeSecond - timeMesure) / beatTime;
