@@ -1,5 +1,4 @@
 #include <JuceHeader.h>
-
 //
 // Some nice example drawing
 class Fan : public juce::Component,
@@ -28,6 +27,10 @@ public:
     {
         factor = 0.0f;
     }
+    int getFactor()
+    {
+        return factor;
+    }
 
     void mouseDrag(const juce::MouseEvent &event) override
     {
@@ -35,35 +38,36 @@ public:
         auto angleInDegrees = event.getDistanceFromDragStartX();
         float angleInRadians = juce::degreesToRadians(angleInDegrees);
 
-        factor = angleInDegrees / 100.0f;
+        factor += angleInDegrees / 500.0f;
         if (factor < 0.0f)
         {
             factor = 0.0f;
         }
-        else if (factor > 1.57f)
+        else if (factor > 1.0f)
         {
-            factor = 1.57f;
+            factor = 1.0f;
         }
         repaint();
     }
 
     void paint(juce::Graphics &g) override
     {
-        const auto centre = juce::Point<float>(getWidth() / 2.0f, getHeight() - (getHeight() / 4.0f));
-        const float length = std::min(getWidth(), getHeight()) * 0.7f;
+            const auto centre = juce::Point<float>(getWidth() / 2.0f, getHeight() - (getHeight() / 4.0f));
+            const float length = std::min(getWidth(), getHeight()) * 0.7f;
 
-        // Calculate the end points of the lines
-        juce::Point<float> endPoint1 = centre + juce::Point<float>(std::cos(factor), -std::sin(factor)) * length;
-        juce::Point<float> endPoint2 = centre + juce::Point<float>(-std::cos(factor), -std::sin(factor)) * length;
+            float test = (1 - factor) * juce::MathConstants<float>::pi / 2.0f;
+            // Calculate the end points of the lines
+            juce::Point<float> endPoint1 = centre + juce::Point<float>(std::cos(test), -std::sin(test)) * length;
+            juce::Point<float> endPoint2 = centre + juce::Point<float>(-std::cos(test), -std::sin(test)) * length;
 
-        // Draw the lines
-        g.setColour(findColour(drawColourId));
-        g.drawLine(centre.x, centre.y, endPoint1.x, endPoint1.y, 2.0f);
-        g.drawLine(centre.x, centre.y, endPoint2.x, endPoint2.y, 2.0f);
+            // Draw the lines
+            g.setColour(findColour(drawColourId));
+            g.drawLine(centre.x, centre.y, endPoint1.x, endPoint1.y, 2.0f);
+            g.drawLine(centre.x, centre.y, endPoint2.x, endPoint2.y, 2.0f);
 
-//TODO
-    juce::Path path;
-    path.startNewSubPath(endPoint1);
+        //TODO
+            juce::Path path;
+            path.startNewSubPath(endPoint1);
     path.addArc(centre.x + length, centre.y + length, 2 * length, 2 * length, juce::MathConstants<float>::pi + factor, juce::MathConstants<float>::pi - factor, true);
     g.strokePath(path, juce::PathStrokeType(2.0f));
 
@@ -116,7 +120,13 @@ public:
     void update() override
     {
         auto factor = getProperty("factor");
-        fan.setFactor(factor.isVoid() ? 3.0f : float(factor));
+        fan.setFactor(factor);
+
+        // fan.setFactor(factor.isVoid() ? 3.0f : float(factor));
+    }
+    int getFactor()
+    {
+        return fan.getFactor();
     }
 
     juce::Component *getWrappedComponent() override

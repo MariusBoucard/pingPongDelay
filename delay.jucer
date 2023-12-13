@@ -4,7 +4,7 @@
               addUsingNamespaceToJuceHeader="0" displaySplashScreen="1" jucerFormatVersion="1"
               pluginName="PingPongDelay" headerPath="&#10;C:\Program\ Files\Faust\include\**&#10;"
               companyName="Fulgurance" pluginVST3Category="Fx" pluginCode="Dppj"
-              pluginFormats="buildVST3">
+              pluginFormats="buildStandalone">
   <MAINGROUP id="oXUuYS" name="PingPongDelay">
     <GROUP id="{B89B3AD5-672E-35AE-9240-8A0B1C0D04FE}" name="New Group"/>
     <GROUP id="{0F9FA3F7-84DA-F429-6784-0B979A73E54A}" name="New Group"/>

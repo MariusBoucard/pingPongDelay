@@ -10,7 +10,8 @@
 #include <JuceHeader.h>
 #include "resources/HorizontalLineSource.h"
 #include "resources/CompressionValue.h"
-#include "faustDSP/FaustEffect.h"
+#include "components/FanComponent.h"
+// #include "faustDSP/FaustEffect.h"
  
 
  const static      juce::StringArray notesValues = { "1/2", "1/4", "1/8", "1/16", "1/32" };
@@ -54,7 +55,7 @@ void initialiseBuilder(foleys::MagicGUIBuilder& builder) override;
     void setCurrentProgram (int index) override;
     const juce::String getProgramName (int index) override;
     void changeProgramName (int index, const juce::String& newName) override;
-    float computePan(float bpm, float ppqPosition, float ppqMesure, float timeSecond, string panType, int timeSigDenominator, int timeSigNumerator);
+    float computePan(float bpm, float ppqPosition, float ppqMesure, float timeSecond, std::string panType, int timeSigDenominator, int timeSigNumerator);
     void updateDelayParameters(float bpm);
     //==============================================================================
     void getStateInformation (juce::MemoryBlock& destData) override;
@@ -90,6 +91,7 @@ private:
     // Your private member variables go here...
         foleys::MagicPlotSource* analyser = nullptr;
         foleys::MagicPlotSource* analyserOutput = nullptr;
+        FanItem* widthComponent = nullptr;
         float pan = 0.0f;
         // mydsp fDSP;
       // foleys::MagicProcessorState magicState { *this };
