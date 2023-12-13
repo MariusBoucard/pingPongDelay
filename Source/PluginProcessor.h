@@ -10,6 +10,8 @@
 #include <JuceHeader.h>
 #include "resources/HorizontalLineSource.h"
 #include "resources/CompressionValue.h"
+#include "components/FanComponent.h"
+// #include "faustDSP/FaustEffect.h"
  
 
  const static      juce::StringArray notesValues = { "1/2", "1/4", "1/8", "1/16", "1/32" };
@@ -89,6 +91,7 @@ private:
     // Your private member variables go here...
         foleys::MagicPlotSource* analyser = nullptr;
         foleys::MagicPlotSource* analyserOutput = nullptr;
+        Fan* widthComponent = nullptr;
         float pan = 0.0f;
         // mydsp fDSP;
       // foleys::MagicProcessorState magicState { *this };

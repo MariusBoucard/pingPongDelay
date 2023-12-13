@@ -13,6 +13,7 @@
 #include "audioGraph/nodes/gainProcessor.h"
 #include "audioGraph/nodes/DryWetMixer.h"
 #include "Components/LissajourComponent.h"
+
 //==============================================================================
 
 juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
@@ -60,8 +61,10 @@ DelayAudioProcessor::DelayAudioProcessor()
         magicState.setGuiValueTree(file);
     else
         magicState.setGuiValueTree(BinaryData::magictest_xml, BinaryData::magictest_xmlSize);
-
+        // Create a FanItem and add it to the magicState
+            
     analyser = magicState.createAndAddObject<foleys::MagicAnalyser>("input");
+    widthComponent = magicState.createAndAddObject<Fan>("fan");
     analyserOutput = magicState.createAndAddObject<foleys::MagicAnalyser>("output");
     magicState.setPlayheadUpdateFrequency(30);
 
@@ -175,6 +178,7 @@ void DelayAudioProcessor::initialiseBuilder(foleys::MagicGUIBuilder &builder)
     builder.registerJUCEFactories();
     builder.registerJUCELookAndFeels();
     builder.registerFactory("Lissajour", &LissajourItem::factory);
+    builder.registerFactory("Fan", &FanItem::factory);
 
     builder.registerLookAndFeel("slide", std::make_unique<LookAndFeelFirst>());
     builder.registerLookAndFeel("threshold", std::make_unique<LookAndFeelThreshold>());
@@ -242,7 +246,7 @@ void DelayAudioProcessor::changeProgramName(int index, const juce::String &newNa
 {
 }
 
-float DelayAudioProcessor::computePan(float bpm,float ppqPosition,float ppqMesure,float timeSecond ,std::string panType,int timeSigDenominator = 4, int timeSigNumerator = 4){
+float DelayAudioProcessor::computePan(float bpm, float ppqPosition, float ppqMesure, float timeSecond, std::string panType, int timeSigDenominator, int timeSigNumerator) {
     // TODO ADD PARAMETER FOR PAN TYPE
     // TODO ADD PARAMETER FOR PAN TIME
     
@@ -285,6 +289,7 @@ void DelayAudioProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
     spec.maximumBlockSize = static_cast<juce::uint32>(samplesPerBlock);
     spec.numChannels = static_cast<juce::uint32>(getTotalNumOutputChannels());
     analyser->prepareToPlay(sampleRate, samplesPerBlock);
+    // fan->prepareToPlay(sampleRate, samplesPerBlock);
     analyserOutput->prepareToPlay(sampleRate, samplesPerBlock);
     audioGraph.prepareToPlay(sampleRate, samplesPerBlock);
 }
@@ -393,7 +398,10 @@ void DelayAudioProcessor::updateDelayParameters(float bpm)
     float delay = *parameters.getRawParameterValue("delaytime");
     float feedback = *parameters.getRawParameterValue("feedback");
     float gain = *parameters.getRawParameterValue("gain");
-    float width = *parameters.getRawParameterValue("width");
+    // auto* widthComponent = magicState.guiValueTree. .findComponent("width");
+    // float width = widthComponent->getFactor();
+    float width = *parameters.getRawParameterValue("width") ;
+
     std::string notesLength = "1/4";
     auto param = dynamic_cast<juce::AudioParameterChoice *>(parameters.getParameter("noteslength"));
     if (param != nullptr)
@@ -414,8 +422,9 @@ void DelayAudioProcessor::updateDelayParameters(float bpm)
     if (delayProcessor != nullptr)
     {
         //  delayProcessor->setDelay(delay);
+
         delayProcessor->setFeedBack(feedback);
-        delayProcessor->setPan(pan);
+       // delayProcessor->setPan(pan);
         delayProcessor->setWidth(width);
         delayProcessor->setNotesLength(notesLength, bpm);
     }
