@@ -9,8 +9,6 @@
 #include "resources/LookAndFeelFirst.h"
 #include "resources/LookAndFeelThreshold.h"
 #include "resources/CompressionValue.h"
-#include "faustDSP/FaustEffect.h"
-#include "audioGraph/nodes/delayProcessor.h"
 #include "audioGraph/nodes/delayPingPongProcessor.h"
 #include "audioGraph/nodes/gainProcessor.h"
 #include "audioGraph/nodes/DryWetMixer.h"

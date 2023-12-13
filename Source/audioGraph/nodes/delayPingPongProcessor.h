@@ -1,7 +1,5 @@
 #include <JuceHeader.h>
-#include "faustDSP/Echo.h"
-#include "faustDSP/EchoMonoToStereo.h"
-#include "faustDSP/FaustEffect.h"
+#include "../../faustDSP/EchoMonoToStereo.h"
 
 class DelayPingPongProcessor : public juce::AudioProcessor
 {
