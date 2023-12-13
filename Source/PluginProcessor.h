@@ -54,7 +54,8 @@ void initialiseBuilder(foleys::MagicGUIBuilder& builder) override;
     void setCurrentProgram (int index) override;
     const juce::String getProgramName (int index) override;
     void changeProgramName (int index, const juce::String& newName) override;
-void updateDelayParameters(float bpm);
+    float computePan(float bpm, float ppqPosition, float ppqMesure, float timeSecond, string panType, int timeSigDenominator, int timeSigNumerator);
+    void updateDelayParameters(float bpm);
     //==============================================================================
     void getStateInformation (juce::MemoryBlock& destData) override;
     void setStateInformation (const void* data, int sizeInBytes) override;

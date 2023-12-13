@@ -243,7 +243,7 @@ void DelayAudioProcessor::changeProgramName(int index, const juce::String &newNa
 {
 }
 
-float computePan(float bpm,float ppqPosition,float ppqMesure,float timeSecond ,string panType,int timeSigDenominator = 4, int timeSigNumerator = 4){
+float DelayAudioProcessor::computePan(float bpm,float ppqPosition,float ppqMesure,float timeSecond ,string panType,int timeSigDenominator = 4, int timeSigNumerator = 4){
     // TODO ADD PARAMETER FOR PAN TYPE
     // TODO ADD PARAMETER FOR PAN TIME
     
@@ -267,15 +267,11 @@ float computePan(float bpm,float ppqPosition,float ppqMesure,float timeSecond ,s
             jassert(pan <= 1.0f && pan >= -1.0f);
 
     } else if (panType == "sin"){
+         double delta = std::fmod( ((*parameters.getRawParameterValue("delaytime") / 1000.0f))*0.5f+timeSecond, (*parameters.getRawParameterValue("delaytime") / 1000.0f))/ (*parameters.getRawParameterValue("delaytime") /1000.0f);    
        
     } else if (panType == "sinRandom") {
         // VERSION SIN RANDOM
-        // pan = std::sin( value);
-        // double delta = std::fmod( ((*parameters.getRawParameterValue("delaytime") / 1000.0f))*0.5f+value, (*parameters.getRawParameterValue("delaytime") / 1000.0f))/ (*parameters.getRawParameterValue("delaytime") /1000.0f);    
-        //double position = getPlayHead()->getPosition()->getPpqPosition().orFallback(0.0);
-        // double lastBeatPosition = getPlayHead()->getPosition()->getPpqPositionOfLastBarStart().orFallback(0.0);
-        //   double lastBeatTime = beatTime * lastBeatPosition;
-        //         double delta = (value - lastBeatTime)/beatTime;
+        pan = std::sin( timeSecond * 2.0f * juce::MathConstants<float>::pi );
     }
     return pan;
 }
