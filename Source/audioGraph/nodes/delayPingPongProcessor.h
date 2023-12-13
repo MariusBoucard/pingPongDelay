@@ -1,7 +1,5 @@
 #include <JuceHeader.h>
-#include "faustDSP/Echo.h"
-#include "faustDSP/EchoMonoToStereo.h"
-#include "faustDSP/FaustEffect.h"
+#include "../../faustDSP/EchoMonoToStereo.h"
 
 class DelayPingPongProcessor : public juce::AudioProcessor
 {
@@ -43,13 +41,9 @@ public:
         updateDelayParameters();
 
         // Process the audio data with the Faust DSP object
-       fDSP.compute(buffer.getNumSamples(), const_cast<float**>(inputChannelData), outputChannelData);
-               // Pan value ranges from -1 (full left) to 1 (full right)
+       fDSP.compute(buffer.getNumSamples(), const_cast<float**>(inputChannelData), outputChannelData);               
+       // Pan value ranges from -1 (full left) to 1 (full right)
 
-
-
-
-        
         // Calculate left and right volume multipliers based on pan value
         float leftVol = pan <= 0.0f ? 1.0f : 1.0f - pan*width;
         float rightVol = pan >= 0.0f ? 1.0f : 1.0f + pan*width;
@@ -102,6 +96,27 @@ public:
     void setWidth(float newWidth) { width = newWidth; }
     void getStateInformation (juce::MemoryBlock& destData) override {}
     void setStateInformation (const void* data, int sizeInBytes) override {}
+
+// TODO : handle the logic to get the input from GUI and convert it to the right value for the DSP
+    void setNotesLength(std::string noteTyp, float bpm){
+        bpm = 100.0f;
+        float quarterNote = (60.0f / bpm) *1000;
+
+        if (noteTyp == "1/2"){
+                delay = quarterNote*2;
+                } else if (noteTyp == "1/4"){   
+                delay = quarterNote;
+                } else if (noteTyp == "1/8"){
+                delay = quarterNote/2;
+                } else if (noteTyp == "1/16"){
+                delay = quarterNote/4;
+                } else if (noteTyp == "1/32"){
+                delay = quarterNote/8;
+                } else {
+                delay = quarterNote;
+                }
+    }
+
 
 private:
     EchoMonoToStereo fDSP;

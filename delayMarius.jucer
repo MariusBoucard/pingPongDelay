@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<JUCERPROJECT id="Sx09LV" name="PingPongDelay" projectType="audioplug" useAppConfig="0"
+              addUsingNamespaceToJuceHeader="0" displaySplashScreen="1" jucerFormatVersion="1"
+              pluginName="PingPongDelay" headerPath="/Users/josip/Documents/JUCELibraries/faust/**"
+              companyName="Fulgurance" pluginVST3Category="Fx" pluginCode="Dppj"
+              pluginFormats="buildAU,buildStandalone">
+  <MAINGROUP id="oXUuYS" name="PingPongDelay">
+    <GROUP id="{B89B3AD5-672E-35AE-9240-8A0B1C0D04FE}" name="New Group"/>
+    <GROUP id="{0F9FA3F7-84DA-F429-6784-0B979A73E54A}" name="New Group"/>
+    <GROUP id="{DD661678-B72A-E686-D3DB-3AABD9675267}" name="Source">
+      <GROUP id="{D59AADE1-572C-CAB9-A66F-8B85235A0863}" name="Components">
+        <FILE id="DHdYbf" name="LissajourComponent.h" compile="0" resource="0"
+              file="Source/Components/LissajourComponent.h"/>
+      </GROUP>
+      <GROUP id="{D00F6FCC-4839-9728-514E-A021911933BC}" name="audioGraph">
+        <GROUP id="{510BC08D-9381-AAF4-6086-89637514B95F}" name="nodes">
+          <FILE id="XmWGK8" name="delayPingPongProcessor.h" compile="0" resource="0"
+                file="Source/audioGraph/nodes/delayPingPongProcessor.h"/>
+          <FILE id="NHelRo" name="delayProcessor.h" compile="0" resource="0"
+                file="Source/audioGraph/nodes/delayProcessor.h"/>
+          <FILE id="bhQk8R" name="DryWetMixer.h" compile="0" resource="0" file="Source/audioGraph/nodes/DryWetMixer.h"/>
+          <FILE id="qe7ozp" name="gainProcessor.h" compile="0" resource="0" file="Source/audioGraph/nodes/gainProcessor.h"/>
+        </GROUP>
+      </GROUP>
+      <GROUP id="{7129F463-6DC7-1224-99AF-4C78ACD2D148}" name="faustDSP">
+        <FILE id="zDAKuc" name="EchoMonoToStereo.h" compile="0" resource="0"
+              file="Source/faustDSP/EchoMonoToStereo.h"/>
+        <FILE id="A0HZcg" name="FaustEffect.h" compile="0" resource="0" file="Source/faustDSP/FaustEffect.h"/>
+        <FILE id="thDtN7" name="Echo.h" compile="0" resource="0" file="Source/faustDSP/Echo.h"/>
+        <FILE id="ekLxla" name="PingPongFaust.cpp" compile="1" resource="0"
+              file="Source/faustDSP/PingPongFaust.cpp"/>
+      </GROUP>
+      <GROUP id="{559436F1-1671-1E40-B396-EEBD0C13A0EE}" name="resources">
+        <FILE id="jfQvQ9" name="CompressionValue.h" compile="0" resource="0"
+              file="Source/resources/CompressionValue.h"/>
+        <FILE id="PVvOqt" name="HorizontalLineSource.h" compile="0" resource="0"
+              file="Source/resources/HorizontalLineSource.h"/>
+        <FILE id="hhoTwm" name="magictest.xml" compile="0" resource="1" file="Source/resources/magictest.xml"/>
+        <FILE id="lbO8Tr" name="space.jpg" compile="0" resource="1" file="Source/resources/space.jpg"/>
+        <FILE id="tz13Gn" name="ThreasholdLineSource.h" compile="0" resource="0"
+              file="Source/resources/ThreasholdLineSource.h"/>
+      </GROUP>
+      <FILE id="F97vnb" name="PluginProcessor.cpp" compile="1" resource="0"
+            file="Source/PluginProcessor.cpp"/>
+      <FILE id="JEE4UG" name="PluginProcessor.h" compile="0" resource="0"
+            file="Source/PluginProcessor.h"/>
+    </GROUP>
+  </MAINGROUP>
+  <MODULES>
+    <MODULE id="foleys_gui_magic" showAllCode="1" useLocalCopy="1" useGlobalPath="0"/>
+    <MODULE id="juce_audio_basics" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_audio_devices" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_audio_formats" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_audio_plugin_client" showAllCode="1" useLocalCopy="0"
+            useGlobalPath="1"/>
+    <MODULE id="juce_audio_processors" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_audio_utils" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_core" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_cryptography" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_data_structures" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_dsp" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_events" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_graphics" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_gui_basics" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_gui_extra" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+  </MODULES>
+  <JUCEOPTIONS JUCE_STRICT_REFCOUNTEDPOINTER="1" JUCE_VST3_CAN_REPLACE_VST2="0"
+               FOLEYS_ENABLE_BINARY_DATA="1"/>
+  <EXPORTFORMATS>
+    <XCODE_MAC targetFolder="Builds/MacOSX">
+      <CONFIGURATIONS>
+        <CONFIGURATION isDebug="1" name="Debug"/>
+        <CONFIGURATION isDebug="0" name="Release"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="foleys_gui_magic" path="../../../JUCELibraries/foleys_gui_magic/foleys_gui_magic/modules"/>
+        <MODULEPATH id="juce_audio_basics" path="../../juce"/>
+        <MODULEPATH id="juce_audio_devices" path="../../juce"/>
+        <MODULEPATH id="juce_audio_formats" path="../../juce"/>
+        <MODULEPATH id="juce_audio_plugin_client" path="../../juce"/>
+        <MODULEPATH id="juce_audio_processors" path="../../juce"/>
+        <MODULEPATH id="juce_audio_utils" path="../../juce"/>
+        <MODULEPATH id="juce_core" path="../../juce"/>
+        <MODULEPATH id="juce_cryptography" path="../../juce"/>
+        <MODULEPATH id="juce_data_structures" path="../../juce"/>
+        <MODULEPATH id="juce_dsp" path="../../juce"/>
+        <MODULEPATH id="juce_events" path="../../juce"/>
+        <MODULEPATH id="juce_graphics" path="../../juce"/>
+        <MODULEPATH id="juce_gui_basics" path="../../juce"/>
+        <MODULEPATH id="juce_gui_extra" path="../../juce"/>
+      </MODULEPATHS>
+    </XCODE_MAC>
+  </EXPORTFORMATS>
+</JUCERPROJECT>
