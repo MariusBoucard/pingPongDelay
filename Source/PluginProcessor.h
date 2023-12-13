@@ -10,8 +10,10 @@
 #include <JuceHeader.h>
 #include "resources/HorizontalLineSource.h"
 #include "resources/CompressionValue.h"
-#include "faustDSP/FaustEffect.h"
  
+
+ const static      juce::StringArray notesValues = { "1/2", "1/4", "1/8", "1/16", "1/32" };
+
 //==============================================================================
 
 class DelayAudioProcessor  : public foleys::MagicProcessor
@@ -51,7 +53,8 @@ void initialiseBuilder(foleys::MagicGUIBuilder& builder) override;
     void setCurrentProgram (int index) override;
     const juce::String getProgramName (int index) override;
     void changeProgramName (int index, const juce::String& newName) override;
-    void updateDelayParameters();
+    float computePan(float bpm, float ppqPosition, float ppqMesure, float timeSecond, std::string panType, int timeSigDenominator, int timeSigNumerator);
+    void updateDelayParameters(float bpm);
     //==============================================================================
     void getStateInformation (juce::MemoryBlock& destData) override;
     void setStateInformation (const void* data, int sizeInBytes) override;
@@ -79,7 +82,7 @@ private:
   juce::AudioProcessorGraph::Node::Ptr gainNode;
     juce::AudioProcessorGraph::Node::Ptr mixerNode;
 
-  
+
         float inputVolume = 0.0f;
    // void initialiseBuilder(foleys::MagicGUIBuilder& builder);
     //==============================================================================

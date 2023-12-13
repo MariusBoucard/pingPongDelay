@@ -9,8 +9,6 @@
 #include "resources/LookAndFeelFirst.h"
 #include "resources/LookAndFeelThreshold.h"
 #include "resources/CompressionValue.h"
-#include "faustDSP/FaustEffect.h"
-#include "audioGraph/nodes/delayProcessor.h"
 #include "audioGraph/nodes/delayPingPongProcessor.h"
 #include "audioGraph/nodes/gainProcessor.h"
 #include "audioGraph/nodes/DryWetMixer.h"
@@ -19,14 +17,19 @@
 
 juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
 {
-
     juce::AudioProcessorValueTreeState::ParameterLayout layout;
-    // layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"inputVolume", 1}, "Input Volume", 0.0f, 100.0f, 50.0f));
-    layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"gain", 1}, "Gain", 0.0f, 1.0f, 0.0f));
-    layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"feedback", 1}, "FeedBack", 0.0f, 1.0f, 0.5f));
+    // Add a ComboBox parameter for the slider
+    layout.add(std::make_unique<juce::AudioParameterChoice>(juce::ParameterID{"noteslength", 1}, "note Time", notesValues, 0));
     layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"delaytime", 1}, "Delay Time", 1.0f, 2000.0f, 500.0f));
-       layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"mix", 1}, "Mix", 0.0f, 1.0f, 0.5f));
-       layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"width", 1}, "Width", 0, 1.0f, 0.0f));
+
+    layout.add(std::make_unique<juce::AudioParameterChoice>(juce::ParameterID{"pingpongspeed", 1}, "Ping Pong Speed", notesValues, 0));
+    layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"pingpongtime", 1}, "Ping Pong Time", 1.0f, 2000.0f, 500.0f));
+
+    // Add other parameters...
+    layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"gain", 1}, "Gain", 0.0f, 1.0f, 1.0f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"feedback", 1}, "FeedBack", 0.0f, 0.99f, 0.5f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"mix", 1}, "Mix", 0.0f, 1.0f, 0.5f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"width", 1}, "Width", 0, 1.0f, 0.0f));
 
     return layout;
 }
@@ -77,10 +80,8 @@ void DelayAudioProcessor::connectNodes()
 
     std::unique_ptr<juce::AudioProcessor> mixerProcessor = std::make_unique<DryWetMixer>();
 
-
-
- mixerNode = audioGraph.addNode(std::move(mixerProcessor));
-       std::unique_ptr<juce::AudioProcessor> gainProcessor = std::make_unique<GainProcessor>();
+    mixerNode = audioGraph.addNode(std::move(mixerProcessor));
+    std::unique_ptr<juce::AudioProcessor> gainProcessor = std::make_unique<GainProcessor>();
 
     // Add the processor to the graph and get the node
     gainNode = audioGraph.addNode(std::move(gainProcessor));
@@ -111,7 +112,6 @@ void DelayAudioProcessor::connectNodes()
             juce::AudioProcessorGraph::Connection connection;
             connection.source = {inputNode->nodeID, channel};
             connection.destination = {gainNode->nodeID, channel};
-
             audioGraph.addConnection(connection);
         }
     }
@@ -144,29 +144,27 @@ void DelayAudioProcessor::connectNodes()
     /*
 MAKE A MIXER AROUND ANOTHER NODE
 */
-// Connect the input to the mixer (dry signal)
-if(inputNode != nullptr && mixerNode != nullptr)
-{
-    for (int channel = 0; channel < 2; ++channel)
+    // Connect the input to the mixer (dry signal)
+    if (inputNode != nullptr && mixerNode != nullptr)
     {
-        juce::AudioProcessorGraph::Connection connection;
-        connection.source = {inputNode->nodeID, channel};
-        connection.destination = {mixerNode->nodeID, channel};
+        for (int channel = 0; channel < 2; ++channel)
+        {
+            juce::AudioProcessorGraph::Connection connection;
+            connection.source = {inputNode->nodeID, channel};
+            connection.destination = {mixerNode->nodeID, channel};
 
-        audioGraph.addConnection(connection);
-         juce::AudioProcessorGraph::Connection connectionOut;
-        connectionOut.source = {delayNode->nodeID, channel};
-        connectionOut.destination = {mixerNode->nodeID, 2+channel};
-        audioGraph.addConnection(connectionOut);
+            audioGraph.addConnection(connection);
+            juce::AudioProcessorGraph::Connection connectionOut;
+            connectionOut.source = {delayNode->nodeID, channel};
+            connectionOut.destination = {mixerNode->nodeID, 2 + channel};
+            audioGraph.addConnection(connectionOut);
 
-         juce::AudioProcessorGraph::Connection connectionOutMixer;
-        connectionOutMixer.source = {mixerNode->nodeID, channel};
-        connectionOutMixer.destination = {outputNode->nodeID, channel};
-        audioGraph.addConnection(connectionOutMixer);
-
+            juce::AudioProcessorGraph::Connection connectionOutMixer;
+            connectionOutMixer.source = {mixerNode->nodeID, channel};
+            connectionOutMixer.destination = {outputNode->nodeID, channel};
+            audioGraph.addConnection(connectionOutMixer);
+        }
     }
-}
-
 }
 
 DelayAudioProcessor::~DelayAudioProcessor()
@@ -176,19 +174,9 @@ void DelayAudioProcessor::initialiseBuilder(foleys::MagicGUIBuilder &builder)
 {
     builder.registerJUCEFactories();
     builder.registerJUCELookAndFeels();
+    builder.registerFactory("Lissajour", &LissajourItem::factory);
 
-    // std::unique_ptr<juce::LookAndFeel> lookAndFeel = std::make_unique<juce::LookAndFeel>(LookAndFeel());
-      // Step 4: Create your fan component
-        // auto fanComponent = std::make_unique<FanComponent>();
-
-//         // Step 5: Register your fan component
-//   builder.registerFactory("fan", [](foleys::MagicGUIBuilder& /*builder*/, const juce::ValueTree& /*tree*/)
-//     {
-//         return std::make_unique<FanComponent>();
-//     });
-    builder.registerFactory ("Lissajour", &LissajourItem::factory);
-
-        builder.registerLookAndFeel("slide", std::make_unique<LookAndFeelFirst>());
+    builder.registerLookAndFeel("slide", std::make_unique<LookAndFeelFirst>());
     builder.registerLookAndFeel("threshold", std::make_unique<LookAndFeelThreshold>());
 }
 
@@ -254,6 +242,40 @@ void DelayAudioProcessor::changeProgramName(int index, const juce::String &newNa
 {
 }
 
+float DelayAudioProcessor::computePan(float bpm,float ppqPosition,float ppqMesure,float timeSecond ,std::string panType,int timeSigDenominator = 4, int timeSigNumerator = 4){
+    // TODO ADD PARAMETER FOR PAN TYPE
+    // TODO ADD PARAMETER FOR PAN TIME
+    
+    double beatTime = 60.0f / bpm;
+    double timeMesure = ppqMesure * beatTime;
+    double pan = 0.0f;
+
+    if(panType == "linear"){
+            double delta = (timeSecond - timeMesure) / beatTime;
+            delta = (ppqPosition - ppqMesure)/timeSigNumerator;
+            // Delta should be between 0 and timeSigNumerator
+            // delta = delta/timeSigNumerator;
+            if(delta > 0.5f){
+                delta = 1.0f - delta;
+            }
+
+            jassert(delta <= 1.0f && delta >= 0.0f);
+            
+            pan = delta*4.0f-1.0f;
+
+            jassert(pan <= 1.0f && pan >= -1.0f);
+
+    } else if (panType == "sin"){
+         double delta = std::fmod( ((*parameters.getRawParameterValue("delaytime") / 1000.0f))*0.5f+timeSecond, (*parameters.getRawParameterValue("delaytime") / 1000.0f))/ (*parameters.getRawParameterValue("delaytime") /1000.0f);    
+       
+    } else if (panType == "sinRandom") {
+        // VERSION SIN RANDOM
+        pan = std::sin( timeSecond * 2.0f * juce::MathConstants<float>::pi );
+    }
+    return pan;
+}
+
+
 //==============================================================================
 void DelayAudioProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
 {
@@ -262,10 +284,8 @@ void DelayAudioProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
     spec.sampleRate = sampleRate;
     spec.maximumBlockSize = static_cast<juce::uint32>(samplesPerBlock);
     spec.numChannels = static_cast<juce::uint32>(getTotalNumOutputChannels());
-    // fDSP.init(sampleRate); // replace sampleRate with your actual sample rate
     analyser->prepareToPlay(sampleRate, samplesPerBlock);
     analyserOutput->prepareToPlay(sampleRate, samplesPerBlock);
-    // delayProcessor_.prepareToPlay(sampleRate, samplesPerBlock);
     audioGraph.prepareToPlay(sampleRate, samplesPerBlock);
 }
 
@@ -335,53 +355,77 @@ void DelayAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer, juce::M
         // Process the audio data with the Faust DSP object
         //     fDSP.compute(buffer.getNumSamples(), const_cast<float**>(inputChannelData), outputChannelData);
     }
+    double bpm = 100.0f;
 
-    updateDelayParameters();
-    if(getPlayHead() != nullptr){
+    pan = 0.0f;
+    if (getPlayHead() != nullptr)
+    {
+        bpm = getPlayHead()->getPosition()->getBpm().orFallback(0.0);
+        float ppqPosition = getPlayHead()->getPosition()->getPpqPosition().orFallback(0.0);
+        float   ppqMesure = getPlayHead()->getPosition()->getPpqPositionOfLastBarStart().orFallback(0.0);
+        double timeSecond = getPlayHead()->getPosition()->getTimeInSeconds().orFallback(0.0);
 
-            double value = getPlayHead()->getPosition()->getTimeInSeconds().orFallback(0.0);
-            pan = std::sin( value);
-            double delta = std::fmod( ((*parameters.getRawParameterValue("delaytime") / 1000.0f))*0.5f+value, (*parameters.getRawParameterValue("delaytime") / 1000.0f))/ (*parameters.getRawParameterValue("delaytime") /1000.0f);               //double position = getPlayHead()->getPosition()->getPpqPosition().orFallback(0.0);
-
-                // double lastBeatPosition = getPlayHead()->getPosition()->getPpqPositionOfLastBarStart().orFallback(0.0);
-                //   double beatTime =  60.0f/ getPlayHead()->getPosition()->getBpm().orFallback(0.0);
-                //   double lastBeatTime = beatTime * lastBeatPosition;
-                //         double delta = (value - lastBeatTime)/beatTime;
- 
-
-
-
-                // Do something with the bar position value...
-                 pan = delta*2.0f - 1.0f;
+        /**
+         * Error with time signature optional
+        */
+    int timeSigDenominator = 4;
+    int timeSigNumerator = 4;
+    juce::Optional<juce::AudioPlayHead::TimeSignature> timsigFromHost = getPlayHead()->getPosition()->getTimeSignature();
+    if (timsigFromHost)
+    {
+        timeSigNumerator = timsigFromHost->numerator;
+        timeSigDenominator = timsigFromHost->denominator;
     }
+
+        std::string panType = "linear";
+
+        // Retourne valeur entre -1 et 1, faire gaffe modelisation trajet
+        pan =   computePan(bpm, ppqPosition, ppqMesure, timeSecond, panType,timeSigDenominator,timeSigNumerator);
+
+
+    }
+    updateDelayParameters(bpm);
     analyserOutput->pushSamples(buffer);
 }
 
-void DelayAudioProcessor::updateDelayParameters()
+void DelayAudioProcessor::updateDelayParameters(float bpm)
 {
-     float delay =    *parameters.getRawParameterValue("delaytime");
- float feedback = *parameters.getRawParameterValue("feedback");
- float gain = *parameters.getRawParameterValue("gain");
- float width = *parameters.getRawParameterValue("width");
-//  float pan = *parameters.getRawParameterValue("pan");
+    float delay = *parameters.getRawParameterValue("delaytime");
+    float feedback = *parameters.getRawParameterValue("feedback");
+    float gain = *parameters.getRawParameterValue("gain");
+    float width = *parameters.getRawParameterValue("width");
+    std::string notesLength = "1/4";
+    auto param = dynamic_cast<juce::AudioParameterChoice *>(parameters.getParameter("noteslength"));
+    if (param != nullptr)
+    {
+        int selectedIndex = param->getIndex();
+        // Do something with selectedIndex...
+        notesLength = param->choices[selectedIndex].toStdString();
+    }
 
-auto gainProcessor = dynamic_cast<GainProcessor*>(gainNode->getProcessor());
-if (gainProcessor != nullptr) {
-    gainProcessor->setGain(gain);
-}
-auto delayProcessor = dynamic_cast<DelayPingPongProcessor*>(delayNode->getProcessor());
-if (delayProcessor != nullptr) {
-    delayProcessor->setDelay(delay);
-     delayProcessor->setFeedBack(feedback);
-    delayProcessor->setPan(pan);
-    delayProcessor->setWidth(width);
-}
-auto mixerProcessor = dynamic_cast<DryWetMixer*>(mixerNode->getProcessor());
-if(mixerProcessor != nullptr){
-    mixerProcessor->setMix(*parameters.getRawParameterValue("mix"));
-    // fDSP.setParamValue("feedback", feedback);
-    //    delayProcessor_.setDelayP/arameters();
-}
+    //  float pan = *parameters.getRawParameterValue("pan");
+
+    auto gainProcessor = dynamic_cast<GainProcessor *>(gainNode->getProcessor());
+    if (gainProcessor != nullptr)
+    {
+        gainProcessor->setGain(gain);
+    }
+    auto delayProcessor = dynamic_cast<DelayPingPongProcessor *>(delayNode->getProcessor());
+    if (delayProcessor != nullptr)
+    {
+        //  delayProcessor->setDelay(delay);
+        delayProcessor->setFeedBack(feedback);
+        delayProcessor->setPan(pan);
+        delayProcessor->setWidth(width);
+        delayProcessor->setNotesLength(notesLength, bpm);
+    }
+    auto mixerProcessor = dynamic_cast<DryWetMixer *>(mixerNode->getProcessor());
+    if (mixerProcessor != nullptr)
+    {
+        mixerProcessor->setMix(*parameters.getRawParameterValue("mix"));
+        // fDSP.setParamValue("feedback", feedback);
+        //    delayProcessor_.setDelayP/arameters();
+    }
 }
 // SUPPR HASEDITORS
 
@@ -394,21 +438,34 @@ if(mixerProcessor != nullptr){
 // }
 
 //==============================================================================
-void DelayAudioProcessor::getStateInformation(juce::MemoryBlock &destData)
+void DelayAudioProcessor::getStateInformation (juce::MemoryBlock& destData)
 {
-    // You should use this method to store your parameters in the memory block.
-    // You could do that either as raw data, or use the XML or ValueTree classes
-    // as intermediaries to make it easy to save and load complex data.
+    // Create an XML element that represents the plugin's current state
+    auto state = parameters.copyState();
+    std::unique_ptr<juce::XmlElement> xml (state.createXml());
+
+    // Use this helper function to stuff it into the binary blob and return it
+    copyXmlToBinary (*xml, destData);
 }
 
-void DelayAudioProcessor::setStateInformation(const void *data, int sizeInBytes)
+void DelayAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
 {
-    // You should use this method to restore your parameters from this memory block,
-    // whose contents will have been created by the getStateInformation() call.
+    // This getXmlFromBinary helper function retrieves our XML from the binary blob
+    std::unique_ptr<juce::XmlElement> xmlState (getXmlFromBinary (data, sizeInBytes));
+
+    if (xmlState.get() != nullptr)
+    {
+        // Make sure that it's actually our type of XML object
+        if (xmlState->hasTagName (parameters.state.getType()))
+        {
+            // Now reload our plugin's state from the XML object
+            parameters.replaceState (juce::ValueTree::fromXml (*xmlState));
+        }
+    }
 }
 
 //==============================================================================
-//This creates new instances of the plugin..
+// This creates new instances of the plugin..
 juce::AudioProcessor *JUCE_CALLTYPE createPluginFilter()
 {
     return new DelayAudioProcessor();
