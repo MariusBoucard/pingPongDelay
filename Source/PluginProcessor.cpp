@@ -64,7 +64,7 @@ DelayAudioProcessor::DelayAudioProcessor()
         // Create a FanItem and add it to the magicState
             
     analyser = magicState.createAndAddObject<foleys::MagicAnalyser>("input");
-
+    widthComponent = magicState.createAndAddObject<Fan>("fan");
     analyserOutput = magicState.createAndAddObject<foleys::MagicAnalyser>("output");
     magicState.setPlayheadUpdateFrequency(30);
 
@@ -289,6 +289,7 @@ void DelayAudioProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
     spec.maximumBlockSize = static_cast<juce::uint32>(samplesPerBlock);
     spec.numChannels = static_cast<juce::uint32>(getTotalNumOutputChannels());
     analyser->prepareToPlay(sampleRate, samplesPerBlock);
+    // fan->prepareToPlay(sampleRate, samplesPerBlock);
     analyserOutput->prepareToPlay(sampleRate, samplesPerBlock);
     audioGraph.prepareToPlay(sampleRate, samplesPerBlock);
 }

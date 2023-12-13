@@ -91,7 +91,7 @@ private:
     // Your private member variables go here...
         foleys::MagicPlotSource* analyser = nullptr;
         foleys::MagicPlotSource* analyserOutput = nullptr;
-       // FanItem* widthComponent = nullptr;
+        Fan* widthComponent = nullptr;
         float pan = 0.0f;
         // mydsp fDSP;
       // foleys::MagicProcessorState magicState { *this };
