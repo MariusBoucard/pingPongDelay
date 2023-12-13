@@ -98,7 +98,7 @@ public:
     void setStateInformation (const void* data, int sizeInBytes) override {}
 
 // TODO : handle the logic to get the input from GUI and convert it to the right value for the DSP
-    void setNotesLength(string noteTyp, float bpm){
+    void setNotesLength(std::string noteTyp, float bpm){
         bpm = 100.0f;
         float quarterNote = (60.0f / bpm) *1000;
 

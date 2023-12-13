@@ -10,7 +10,6 @@
 #include <JuceHeader.h>
 #include "resources/HorizontalLineSource.h"
 #include "resources/CompressionValue.h"
-#include "faustDSP/FaustEffect.h"
  
 
  const static      juce::StringArray notesValues = { "1/2", "1/4", "1/8", "1/16", "1/32" };

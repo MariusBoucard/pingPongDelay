@@ -71,3 +71,4 @@ cscope.*
 nbproject/
 delay.jucer
 template.jucer
+*.jucer
