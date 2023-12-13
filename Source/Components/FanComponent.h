@@ -124,10 +124,10 @@ public:
 
         // fan.setFactor(factor.isVoid() ? 3.0f : float(factor));
     }
-    int getFactor()
-    {
-        return fan.getFactor();
-    }
+    // int getFactor()
+    // {
+    //     return fan.getFactor();
+    // }
 
     juce::Component *getWrappedComponent() override
     {

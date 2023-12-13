@@ -10,6 +10,7 @@
     <GROUP id="{0F9FA3F7-84DA-F429-6784-0B979A73E54A}" name="New Group"/>
     <GROUP id="{DD661678-B72A-E686-D3DB-3AABD9675267}" name="Source">
       <GROUP id="{D59AADE1-572C-CAB9-A66F-8B85235A0863}" name="Components">
+        <FILE id="rIhsEP" name="FanComponent.h" compile="0" resource="0" file="Source/Components/FanComponent.h"/>
         <FILE id="DHdYbf" name="LissajourComponent.h" compile="0" resource="0"
               file="Source/Components/LissajourComponent.h"/>
       </GROUP>

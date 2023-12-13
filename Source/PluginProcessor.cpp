@@ -64,6 +64,9 @@ DelayAudioProcessor::DelayAudioProcessor()
     else
         magicState.setGuiValueTree(BinaryData::magictest_xml, BinaryData::magictest_xmlSize);
         // Create a FanItem and add it to the magicState
+            
+    analyser = magicState.createAndAddObject<foleys::MagicAnalyser>("input");
+
     analyserOutput = magicState.createAndAddObject<foleys::MagicAnalyser>("output");
     magicState.setPlayheadUpdateFrequency(30);
 
@@ -397,8 +400,8 @@ void DelayAudioProcessor::updateDelayParameters(float bpm)
     float feedback = *parameters.getRawParameterValue("feedback");
     float gain = *parameters.getRawParameterValue("gain");
     // auto* widthComponent = magicState.guiValueTree. .findComponent("width");
-    float width = widthComponent->getFactor();
-   *parameters.getRawParameterValue("width") = width;
+    // float width = widthComponent->getFactor();
+    float width = *parameters.getRawParameterValue("width") ;
 
     string notesLength = "1/4";
     auto param = dynamic_cast<juce::AudioParameterChoice *>(parameters.getParameter("noteslength"));
