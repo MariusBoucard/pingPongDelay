@@ -9,8 +9,6 @@
 #include "resources/LookAndFeelFirst.h"
 #include "resources/LookAndFeelThreshold.h"
 #include "resources/CompressionValue.h"
-#include "faustDSP/FaustEffect.h"
-#include "audioGraph/nodes/delayProcessor.h"
 #include "audioGraph/nodes/delayPingPongProcessor.h"
 #include "audioGraph/nodes/gainProcessor.h"
 #include "audioGraph/nodes/DryWetMixer.h"
@@ -248,7 +246,7 @@ void DelayAudioProcessor::changeProgramName(int index, const juce::String &newNa
 {
 }
 
-float DelayAudioProcessor::computePan(float bpm, float ppqPosition, float ppqMesure, float timeSecond, string panType, int timeSigDenominator, int timeSigNumerator) {
+float DelayAudioProcessor::computePan(float bpm, float ppqPosition, float ppqMesure, float timeSecond, std::string panType, int timeSigDenominator, int timeSigNumerator) {
     // TODO ADD PARAMETER FOR PAN TYPE
     // TODO ADD PARAMETER FOR PAN TIME
     
@@ -383,7 +381,7 @@ void DelayAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer, juce::M
         timeSigDenominator = timsigFromHost->denominator;
     }
 
-        string panType = "linear";
+        std::string panType = "linear";
 
         // Retourne valeur entre -1 et 1, faire gaffe modelisation trajet
         pan =   computePan(bpm, ppqPosition, ppqMesure, timeSecond, panType,timeSigDenominator,timeSigNumerator);
@@ -403,7 +401,7 @@ void DelayAudioProcessor::updateDelayParameters(float bpm)
     // float width = widthComponent->getFactor();
     float width = *parameters.getRawParameterValue("width") ;
 
-    string notesLength = "1/4";
+    std::string notesLength = "1/4";
     auto param = dynamic_cast<juce::AudioParameterChoice *>(parameters.getParameter("noteslength"));
     if (param != nullptr)
     {
