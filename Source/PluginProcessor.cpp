@@ -242,7 +242,7 @@ void DelayAudioProcessor::changeProgramName(int index, const juce::String &newNa
 {
 }
 
-float DelayAudioProcessor::computePan(float bpm,float ppqPosition,float ppqMesure,float timeSecond ,string panType,int timeSigDenominator = 4, int timeSigNumerator = 4){
+float DelayAudioProcessor::computePan(float bpm,float ppqPosition,float ppqMesure,float timeSecond ,std::string panType,int timeSigDenominator = 4, int timeSigNumerator = 4){
     // TODO ADD PARAMETER FOR PAN TYPE
     // TODO ADD PARAMETER FOR PAN TIME
     
@@ -377,7 +377,7 @@ void DelayAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer, juce::M
         timeSigDenominator = timsigFromHost->denominator;
     }
 
-        string panType = "linear";
+        std::string panType = "linear";
 
         // Retourne valeur entre -1 et 1, faire gaffe modelisation trajet
         pan =   computePan(bpm, ppqPosition, ppqMesure, timeSecond, panType,timeSigDenominator,timeSigNumerator);
@@ -394,7 +394,7 @@ void DelayAudioProcessor::updateDelayParameters(float bpm)
     float feedback = *parameters.getRawParameterValue("feedback");
     float gain = *parameters.getRawParameterValue("gain");
     float width = *parameters.getRawParameterValue("width");
-    string notesLength = "1/4";
+    std::string notesLength = "1/4";
     auto param = dynamic_cast<juce::AudioParameterChoice *>(parameters.getParameter("noteslength"));
     if (param != nullptr)
     {

@@ -72,3 +72,5 @@ nbproject/
 delay.jucer
 template.jucer
 *.jucer
+*.sav*.xml
+
