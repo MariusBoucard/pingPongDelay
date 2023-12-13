@@ -244,34 +244,38 @@ void DelayAudioProcessor::changeProgramName(int index, const juce::String &newNa
 }
 
 float computePan(float bpm,float ppqPosition,float ppqMesure,float timeSecond ,string panType,int timeSigDenominator = 4, int timeSigNumerator = 4){
+    // TODO ADD PARAMETER FOR PAN TYPE
+    // TODO ADD PARAMETER FOR PAN TIME
+    
     double beatTime = 60.0f / bpm;
     double timeMesure = ppqMesure * beatTime;
     double pan = 0.0f;
 
     if(panType == "linear"){
             double delta = (timeSecond - timeMesure) / beatTime;
+            delta = (ppqPosition - ppqMesure)/timeSigNumerator;
             // Delta should be between 0 and timeSigNumerator
-            delta = delta/timeSigNumerator;
+            // delta = delta/timeSigNumerator;
             if(delta > 0.5f){
                 delta = 1.0f - delta;
             }
 
-            pan = delta*2.0f-1.0f;
-            jassert(pan <= 1.0f && pan >= -1.0f);	
+            jassert(delta <= 1.0f && delta >= 0.0f);
+            
+            pan = delta*4.0f-1.0f;
+
+            jassert(pan <= 1.0f && pan >= -1.0f);
 
     } else if (panType == "sin"){
        
     } else if (panType == "sinRandom") {
-
         // VERSION SIN RANDOM
-
         // pan = std::sin( value);
-        // double delta = std::fmod( ((*parameters.getRawParameterValue("delaytime") / 1000.0f))*0.5f+value, (*parameters.getRawParameterValue("delaytime") / 1000.0f))/ (*parameters.getRawParameterValue("delaytime") /1000.0f);               //double position = getPlayHead()->getPosition()->getPpqPosition().orFallback(0.0);
-
+        // double delta = std::fmod( ((*parameters.getRawParameterValue("delaytime") / 1000.0f))*0.5f+value, (*parameters.getRawParameterValue("delaytime") / 1000.0f))/ (*parameters.getRawParameterValue("delaytime") /1000.0f);    
+        //double position = getPlayHead()->getPosition()->getPpqPosition().orFallback(0.0);
         // double lastBeatPosition = getPlayHead()->getPosition()->getPpqPositionOfLastBarStart().orFallback(0.0);
         //   double lastBeatTime = beatTime * lastBeatPosition;
         //         double delta = (value - lastBeatTime)/beatTime;
-
     }
     return pan;
 }
