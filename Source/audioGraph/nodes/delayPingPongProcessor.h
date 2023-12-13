@@ -43,13 +43,9 @@ public:
         updateDelayParameters();
 
         // Process the audio data with the Faust DSP object
-       fDSP.compute(buffer.getNumSamples(), const_cast<float**>(inputChannelData), outputChannelData);
-               // Pan value ranges from -1 (full left) to 1 (full right)
+       fDSP.compute(buffer.getNumSamples(), const_cast<float**>(inputChannelData), outputChannelData);               
+       // Pan value ranges from -1 (full left) to 1 (full right)
 
-
-
-
-        
         // Calculate left and right volume multipliers based on pan value
         float leftVol = pan <= 0.0f ? 1.0f : 1.0f - pan*width;
         float rightVol = pan >= 0.0f ? 1.0f : 1.0f + pan*width;
@@ -121,7 +117,6 @@ public:
                 } else {
                 delay = quarterNote;
                 }
-
     }
 
 

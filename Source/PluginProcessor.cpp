@@ -23,6 +23,8 @@ juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
     // Add a ComboBox parameter for the slider
     layout.add(std::make_unique<juce::AudioParameterChoice>(juce::ParameterID{"noteslength", 1}, "note Time", notesValues, 0));
 
+    layout.add(std::make_unique<juce::AudioParameterChoice>(juce::ParameterID{"pingpongspeed", 1}, "Ping Pong Speed", notesValues, 0));
+
     // Add other parameters...
     layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"gain", 1}, "Gain", 0.0f, 1.0f, 0.0f));
     layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"feedback", 1}, "FeedBack", 0.0f, 1.0f, 0.5f));
@@ -173,16 +175,6 @@ void DelayAudioProcessor::initialiseBuilder(foleys::MagicGUIBuilder &builder)
 {
     builder.registerJUCEFactories();
     builder.registerJUCELookAndFeels();
-
-    // std::unique_ptr<juce::LookAndFeel> lookAndFeel = std::make_unique<juce::LookAndFeel>(LookAndFeel());
-    // Step 4: Create your fan component
-    // auto fanComponent = std::make_unique<FanComponent>();
-
-    //         // Step 5: Register your fan component
-    //   builder.registerFactory("fan", [](foleys::MagicGUIBuilder& /*builder*/, const juce::ValueTree& /*tree*/)
-    //     {
-    //         return std::make_unique<FanComponent>();
-    //     });
     builder.registerFactory("Lissajour", &LissajourItem::factory);
 
     builder.registerLookAndFeel("slide", std::make_unique<LookAndFeelFirst>());
@@ -251,6 +243,41 @@ void DelayAudioProcessor::changeProgramName(int index, const juce::String &newNa
 {
 }
 
+float computePan(float bpm,float ppqPosition,float ppqMesure,float timeSecond ,string panType,int timeSigDenominator = 4, int timeSigNumerator = 4){
+    double beatTime = 60.0f / bpm;
+    double timeMesure = ppqMesure * beatTime;
+    double pan = 0.0f;
+    return pan;
+
+    if(panType == "linear"){
+            double delta = (timeSecond - timeMesure) / beatTime;
+            // Delta should be between 0 and timeSigNumerator
+            delta = delta/timeSigNumerator;
+            if(delta > 0.5f){
+                delta = 1.0f - delta;
+            }
+
+            pan = delta*2.0f-1.0f;
+            jassert(pan <= 1.0f && pan >= -1.0f);	
+
+    } else if (panType == "sin"){
+       
+    } else if (panType == "sinRandom") {
+
+        // VERSION SIN RANDOM
+
+        // pan = std::sin( value);
+        // double delta = std::fmod( ((*parameters.getRawParameterValue("delaytime") / 1000.0f))*0.5f+value, (*parameters.getRawParameterValue("delaytime") / 1000.0f))/ (*parameters.getRawParameterValue("delaytime") /1000.0f);               //double position = getPlayHead()->getPosition()->getPpqPosition().orFallback(0.0);
+
+        // double lastBeatPosition = getPlayHead()->getPosition()->getPpqPositionOfLastBarStart().orFallback(0.0);
+        //   double lastBeatTime = beatTime * lastBeatPosition;
+        //         double delta = (value - lastBeatTime)/beatTime;
+
+    }
+    return pan;
+}
+
+
 //==============================================================================
 void DelayAudioProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
 {
@@ -259,10 +286,8 @@ void DelayAudioProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
     spec.sampleRate = sampleRate;
     spec.maximumBlockSize = static_cast<juce::uint32>(samplesPerBlock);
     spec.numChannels = static_cast<juce::uint32>(getTotalNumOutputChannels());
-    // fDSP.init(sampleRate); // replace sampleRate with your actual sample rate
     analyser->prepareToPlay(sampleRate, samplesPerBlock);
     analyserOutput->prepareToPlay(sampleRate, samplesPerBlock);
-    // delayProcessor_.prepareToPlay(sampleRate, samplesPerBlock);
     audioGraph.prepareToPlay(sampleRate, samplesPerBlock);
 }
 
@@ -338,27 +363,28 @@ void DelayAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer, juce::M
     if (getPlayHead() != nullptr)
     {
         bpm = getPlayHead()->getPosition()->getBpm().orFallback(0.0);
+        float ppqPosition = getPlayHead()->getPosition()->getPpqPosition().orFallback(0.0);
+        float   ppqMesure = getPlayHead()->getPosition()->getPpqPositionOfLastBarStart().orFallback(0.0);
+        double timeSecond = getPlayHead()->getPosition()->getTimeInSeconds().orFallback(0.0);
 
-        double beatTime = 60.0f / getPlayHead()->getPosition()->getBpm().orFallback(0.0);
+        /**
+         * Error with time signature optional
+        */
+    int timeSigDenominator = 4;
+    int timeSigNumerator = 4;
+    juce::Optional<juce::AudioPlayHead::TimeSignature> timsigFromHost = getPlayHead()->getPosition()->getTimeSignature();
+    if (timsigFromHost)
+    {
+        timeSigNumerator = timsigFromHost->numerator;
+        timeSigDenominator = timsigFromHost->denominator;
+    }
 
-        double value = getPlayHead()->getPosition()->getTimeInSeconds().orFallback(0.0);
+        string panType = "linear";
 
-        double mesureValue = getPlayHead()->getPosition()->getPpqPositionOfLastBarStart().orFallback(0.0);
-        
-        double timeMesure = mesureValue * beatTime;
-        // Retourne valeur entre 0 et 1, faire gaffe modelisation trajet
-        double delta = (value - timeMesure) / beatTime;
+        // Retourne valeur entre -1 et 1, faire gaffe modelisation trajet
+        pan =   computePan(bpm, ppqPosition, ppqMesure, timeSecond, panType,timeSigDenominator,timeSigNumerator);
 
-        // VERSION SIN RANDOM
 
-        // pan = std::sin( value);
-        // double delta = std::fmod( ((*parameters.getRawParameterValue("delaytime") / 1000.0f))*0.5f+value, (*parameters.getRawParameterValue("delaytime") / 1000.0f))/ (*parameters.getRawParameterValue("delaytime") /1000.0f);               //double position = getPlayHead()->getPosition()->getPpqPosition().orFallback(0.0);
-
-        // double lastBeatPosition = getPlayHead()->getPosition()->getPpqPositionOfLastBarStart().orFallback(0.0);
-        //   double lastBeatTime = beatTime * lastBeatPosition;
-        //         double delta = (value - lastBeatTime)/beatTime;
-
-        pan = delta * 0.5f - 1.0f;
     }
     updateDelayParameters(bpm);
     analyserOutput->pushSamples(buffer);
