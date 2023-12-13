@@ -22,13 +22,14 @@ juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
     juce::AudioProcessorValueTreeState::ParameterLayout layout;
     // Add a ComboBox parameter for the slider
     layout.add(std::make_unique<juce::AudioParameterChoice>(juce::ParameterID{"noteslength", 1}, "note Time", notesValues, 0));
+    layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"delaytime", 1}, "Delay Time", 1.0f, 2000.0f, 500.0f));
 
     layout.add(std::make_unique<juce::AudioParameterChoice>(juce::ParameterID{"pingpongspeed", 1}, "Ping Pong Speed", notesValues, 0));
+    layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"pingpongtime", 1}, "Ping Pong Time", 1.0f, 2000.0f, 500.0f));
 
     // Add other parameters...
-    layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"gain", 1}, "Gain", 0.0f, 1.0f, 0.0f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"gain", 1}, "Gain", 0.0f, 1.0f, 1.0f));
     layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"feedback", 1}, "FeedBack", 0.0f, 0.99f, 0.5f));
-    layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"delaytime", 1}, "Delay Time", 1.0f, 2000.0f, 500.0f));
     layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"mix", 1}, "Mix", 0.0f, 1.0f, 0.5f));
     layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"width", 1}, "Width", 0, 1.0f, 0.0f));
 
@@ -439,17 +440,30 @@ void DelayAudioProcessor::updateDelayParameters(float bpm)
 // }
 
 //==============================================================================
-void DelayAudioProcessor::getStateInformation(juce::MemoryBlock &destData)
+void DelayAudioProcessor::getStateInformation (juce::MemoryBlock& destData)
 {
-    // You should use this method to store your parameters in the memory block.
-    // You could do that either as raw data, or use the XML or ValueTree classes
-    // as intermediaries to make it easy to save and load complex data.
+    // Create an XML element that represents the plugin's current state
+    auto state = parameters.copyState();
+    std::unique_ptr<juce::XmlElement> xml (state.createXml());
+
+    // Use this helper function to stuff it into the binary blob and return it
+    copyXmlToBinary (*xml, destData);
 }
 
-void DelayAudioProcessor::setStateInformation(const void *data, int sizeInBytes)
+void DelayAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
 {
-    // You should use this method to restore your parameters from this memory block,
-    // whose contents will have been created by the getStateInformation() call.
+    // This getXmlFromBinary helper function retrieves our XML from the binary blob
+    std::unique_ptr<juce::XmlElement> xmlState (getXmlFromBinary (data, sizeInBytes));
+
+    if (xmlState.get() != nullptr)
+    {
+        // Make sure that it's actually our type of XML object
+        if (xmlState->hasTagName (parameters.state.getType()))
+        {
+            // Now reload our plugin's state from the XML object
+            parameters.replaceState (juce::ValueTree::fromXml (*xmlState));
+        }
+    }
 }
 
 //==============================================================================
