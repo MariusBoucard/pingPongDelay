@@ -23,8 +23,9 @@ juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
     layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"delaytime", 1}, "Delay Time", 1.0f, 2000.0f, 500.0f));
     layout.add(std::make_unique<juce::AudioParameterInt>(juce::ParameterID{"switchDelay", 1}, "switch delay", 0, 1, 0));
 
-    layout.add(std::make_unique<juce::AudioParameterChoice>(juce::ParameterID{"pingpongspeed", 1}, "Ping Pong Speed", notesValues, 0));
-    layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"pingpongtime", 1}, "Ping Pong Time", -10.0f, 200.0f, 500.0f));
+    layout.add(std::make_unique<juce::AudioParameterChoice>(juce::ParameterID{"pingpongnotes", 1}, "Ping Pong Speed", notesValues, 0));
+    layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"pingpongtime", 1}, "Ping Pong Time", 0.1f, 200.0f, 500.0f));
+    layout.add(std::make_unique<juce::AudioParameterChoice>(juce::ParameterID{"pingpongstyle", 1}, "Ping Pong Style", PINGPONG_STYLE, 0));
     layout.add(std::make_unique<juce::AudioParameterInt>(juce::ParameterID{"switchpingpong", 1}, "switch ping pong", 0, 1, 0));
 
     // Add other parameters...
@@ -32,6 +33,9 @@ juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
     layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"feedback", 1}, "FeedBack", 0.0f, 0.99f, 0.5f));
     layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"mix", 1}, "Mix", 0.0f, 1.0f, 0.5f));
     layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"width", 1}, "Width", 0, 1.0f, 0.69f));
+
+    layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"pan", 1}, "Pan", -1.0f, 1.0f, 0.0f));
+    layout.add(std::make_unique<juce::AudioParameterInt>(juce::ParameterID{"manualPan", 1}, "Manual Panning", 0, 1, 1));
     return layout;
 }
 
@@ -60,18 +64,52 @@ DelayAudioProcessor::DelayAudioProcessor()
     if (file.existsAsFile())
         magicState.setGuiValueTree(file);
     else
-        //  findGuiItemWithId("widthComponent");
-    magicState.setGuiValueTree(BinaryData::magictest_xml, BinaryData::magictest_xmlSize);
-    // Create a FanItem and add it to the magicState
-    //  magicState.createAndAddObject<Fan>("fan");
+        magicState.setGuiValueTree(BinaryData::magictest_xml, BinaryData::magictest_xmlSize);
     analyser = magicState.createAndAddObject<foleys::MagicAnalyser>("input");
     analyserOutput = magicState.createAndAddObject<foleys::MagicAnalyser>("output");
     magicState.setPlayheadUpdateFrequency(30);
-
     audioGraph.clear();
+    // DelayAudioProcessor::connectNodes();
+    DelayAudioProcessor::debugNodes();
+}
 
-    // Connect the output of the first node to the input of the second
-    DelayAudioProcessor::connectNodes();
+void DelayAudioProcessor::debugNodes(){
+    std::unique_ptr<juce::AudioProcessor> mixerProcessor = std::make_unique<DryWetMixer>();
+
+    mixerNode = audioGraph.addNode(std::move(mixerProcessor));
+    std::unique_ptr<juce::AudioProcessor> gainProcessor = std::make_unique<GainProcessor>();
+
+    // Add the processor to the graph and get the node
+    gainNode = audioGraph.addNode(std::move(gainProcessor));
+    std::unique_ptr<juce::AudioProcessor> delayProcessor = std::make_unique<DelayPingPongProcessor>();
+
+    // Add the processor to the graph and get the node
+    delayNode = audioGraph.addNode(std::move(delayProcessor));
+
+    // Create an AudioProcessor for the input
+    std::unique_ptr<juce::AudioProcessor> inputProcessor = std::make_unique<juce::AudioProcessorGraph::AudioGraphIOProcessor>(
+        juce::AudioProcessorGraph::AudioGraphIOProcessor::audioInputNode);
+
+    // Add the processor to the graph and get the node
+    auto inputNode = audioGraph.addNode(std::move(inputProcessor));
+
+    // Create an AudioProcessor for the output
+    std::unique_ptr<juce::AudioProcessor> outputProcessor = std::make_unique<juce::AudioProcessorGraph::AudioGraphIOProcessor>(
+        juce::AudioProcessorGraph::AudioGraphIOProcessor::audioOutputNode);
+
+    // Add the processor to the graph and get the node
+    auto outputNode = audioGraph.addNode(std::move(outputProcessor));
+        // Connect the input to the first node
+    if (inputNode != nullptr && outputNode != nullptr)
+    {
+        for (int channel = 0; channel < getTotalNumInputChannels(); ++channel)
+        {
+            juce::AudioProcessorGraph::Connection connection;
+            connection.source = {inputNode->nodeID, channel};
+            connection.destination = {outputNode->nodeID, channel};
+            audioGraph.addConnection(connection);
+        }
+    }
 }
 
 void DelayAudioProcessor::connectNodes()
@@ -103,6 +141,7 @@ void DelayAudioProcessor::connectNodes()
     // Add the processor to the graph and get the node
     auto outputNode = audioGraph.addNode(std::move(outputProcessor));
 
+    
     // Connect the input to the first node
     if (inputNode != nullptr && gainNode != nullptr)
     {
@@ -166,13 +205,13 @@ MAKE A MIXER AROUND ANOTHER NODE
     }
 }
 
-void printValueTree(const juce::ValueTree& tree, const juce::String& indent = "")
+void printValueTree(const juce::ValueTree &tree, const juce::String &indent = "")
 {
     std::cout << indent << "ValueTree: " << tree.getType().toString() << std::endl;
 
     for (int i = 0; i < tree.getNumProperties(); ++i)
     {
-        const auto& property = tree.getPropertyName(i);
+        const auto &property = tree.getPropertyName(i);
         std::cout << indent << "  Property: " << property.toString() << " = " << tree[property].toString() << std::endl;
     }
 
@@ -183,36 +222,36 @@ void printValueTree(const juce::ValueTree& tree, const juce::String& indent = ""
 }
 
 // SUPER IMPORTANT
-    juce::ValueTree findChildWithProperty(const juce::ValueTree& tree, const juce::Identifier& property, const juce::var& value)
+juce::ValueTree findChildWithProperty(const juce::ValueTree &tree, const juce::Identifier &property, const juce::var &value)
+{
+    if (tree.hasProperty(property) && tree[property] == value)
+        return tree;
+
+    for (int i = 0; i < tree.getNumChildren(); ++i)
     {
-        if (tree.hasProperty(property) && tree[property] == value)
-            return tree;
-
-        for (int i = 0; i < tree.getNumChildren(); ++i)
-        {
-            juce::ValueTree child = tree.getChild(i);
-            juce::ValueTree result = findChildWithProperty(child, property, value);
-            if (result.isValid())
-                return result;
-        }
-
-        return juce::ValueTree();
+        juce::ValueTree child = tree.getChild(i);
+        juce::ValueTree result = findChildWithProperty(child, property, value);
+        if (result.isValid())
+            return result;
     }
 
+    return juce::ValueTree();
+}
 
 /**
  * Function to change a parameter for a slider
-*/
-void DelayAudioProcessor::changeSliderParameter(const juce::String& sliderID, const juce::String& newParameterName)
+ */
+void DelayAudioProcessor::changeSliderParameter(const juce::String &sliderID, const juce::String &newParameterName)
 {
-    auto sliderValueTree = findChildWithProperty(magicState.getGuiTree(),"id",sliderID);
+    auto sliderValueTree = findChildWithProperty(magicState.getGuiTree(), "id", sliderID);
     // printValueTree(sliderValueTree);
 
     if (sliderValueTree.isValid())
     {
-     sliderValueTree.setProperty("parameter", newParameterName, nullptr);
+        sliderValueTree.setProperty("parameter", newParameterName, nullptr);
     }
-    else {
+    else
+    {
     }
 }
 
@@ -295,7 +334,7 @@ void DelayAudioProcessor::changeProgramName(int index, const juce::String &newNa
 
 float DelayAudioProcessor::computePan(float bpm, float ppqPosition, float ppqMesure, float timeSecond, std::string panType, int timeSigDenominator, int timeSigNumerator)
 {
-    
+
     // TODO ADD PARAMETER FOR PAN TYPE
     // TODO ADD PARAMETER FOR PAN TIME
 
@@ -332,29 +371,19 @@ float DelayAudioProcessor::computePan(float bpm, float ppqPosition, float ppqMes
     return pan;
 }
 
-
-
-    void DelayAudioProcessor::parameterChanged(const juce::String& parameterID, float newValue) 
-    {
-       // Could be usefull in the futur, but not now
-    }
-
-
-
+void DelayAudioProcessor::parameterChanged(const juce::String &parameterID, float newValue)
+{
+    // Could be usefull in the futur, but not now
+}
 
 //==============================================================================
 void DelayAudioProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
 {
-    // if(auto pointer = dynamic_cast<foleys::MagicGUIBuilder*> (guiBuilder)){
-    //     pointer->clearGUI();
-    // }
     juce::dsp::ProcessSpec spec;
-
     spec.sampleRate = sampleRate;
     spec.maximumBlockSize = static_cast<juce::uint32>(samplesPerBlock);
     spec.numChannels = static_cast<juce::uint32>(getTotalNumOutputChannels());
     analyser->prepareToPlay(sampleRate, samplesPerBlock);
-    // fan->prepareToPlay(sampleRate, samplesPerBlock);
     analyserOutput->prepareToPlay(sampleRate, samplesPerBlock);
     audioGraph.prepareToPlay(sampleRate, samplesPerBlock);
 }
@@ -362,9 +391,6 @@ void DelayAudioProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
 void DelayAudioProcessor::releaseResources()
 {
     audioGraph.releaseResources();
-
-    // When playback stops, you can use this as an opportunity to free up any
-    // spare memory, etc.
 }
 
 #ifndef JucePlugin_PreferredChannelConfigurations
@@ -374,10 +400,6 @@ bool DelayAudioProcessor::isBusesLayoutSupported(const BusesLayout &layouts) con
     juce::ignoreUnused(layouts);
     return true;
 #else
-    // This is the place where you check if the layout is supported.
-    // In this template code we only support mono or stereo.
-    // Some plugin hosts, such as certain GarageBand versions, will only
-    // load plugins that support stereo bus layouts.
     if (layouts.getMainOutputChannelSet() != juce::AudioChannelSet::mono() && layouts.getMainOutputChannelSet() != juce::AudioChannelSet::stereo())
         return false;
 
@@ -399,17 +421,12 @@ void DelayAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer, juce::M
     auto totalNumInputChannels = getTotalNumInputChannels();
     auto totalNumOutputChannels = getTotalNumOutputChannels();
 
-    // In case we have more outputs than inputs, this code clears any output
-    // channels that didn't contain input data, (because these aren't
-    // guaranteed to be empty - they may contain garbage).
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear(i, 0, buffer.getNumSamples());
 
-    // This is the place where you'd normally do the guts of your plugin's
-    // audio processing...
-    audioGraph.processBlock(buffer, midiMessages);
+ audioGraph.processBlock(buffer, midiMessages);
 
-    // Make sure we are processing stereo audio
+    // // Make sure we are processing stereo audio
     if (totalNumInputChannels == 2 && totalNumOutputChannels == 2)
     {
         // Get pointers to the input and output channel data
@@ -421,7 +438,6 @@ void DelayAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer, juce::M
         outputChannelData[0] = buffer.getWritePointer(0);
         outputChannelData[1] = buffer.getWritePointer(1);
     }
-    double bpm = 100.0f;
 
     pan = 0.0f;
     if (getPlayHead() != nullptr)
@@ -446,29 +462,42 @@ void DelayAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer, juce::M
         std::string panType = "linear";
 
         // Retourne valeur entre -1 et 1, faire gaffe modelisation trajet
+
         pan = computePan(bpm, ppqPosition, ppqMesure, timeSecond, panType, timeSigDenominator, timeSigNumerator);
     }
+    updateGUI();
     updateDelayParameters(bpm);
     analyserOutput->pushSamples(buffer);
 }
-
-void DelayAudioProcessor::updateDelayParameters(float bpm)
+void DelayAudioProcessor::updateGUI()
 {
-    float delay = *parameters.getRawParameterValue("delaytime");
-    float feedback = *parameters.getRawParameterValue("feedback");
-    float gain = *parameters.getRawParameterValue("gain");
+    switchDelay = *parameters.getRawParameterValue("switchDelay");
 
-    auto rootGui = magicState.getGuiTree();
-    float width = 0.39f;
-
-    float switchDelay = *parameters.getRawParameterValue("switchDelay");
-    
-    if(switchDelay == 1){
+    if (switchDelay == 1)
+    {
         changeSliderParameter("delaySlider", "delaytime");
-    } else {
+    }
+    else
+    {
         changeSliderParameter("delaySlider", "noteslength");
     }
 
+    switchPingPong = *parameters.getRawParameterValue("switchpingpong");
+    if (switchPingPong == 1)
+    {
+        changeSliderParameter("pingPongSlider", "pingpongtime");
+    }
+    else
+    {
+        changeSliderParameter("pingPongSlider", "pingpongnotes");
+    }
+}
+void DelayAudioProcessor::updateDelayParameters(float bpm)
+{
+    float feedback = *parameters.getRawParameterValue("feedback");
+    float gain = *parameters.getRawParameterValue("gain");
+    float width = *parameters.getRawParameterValue("width");
+    auto rootGui = magicState.getGuiTree();
 
     //================== Not Working Code =================
     // auto widthComponent = magicState.getGuiTree().getChildWithName("root").getChildWithName("container").getChildWithName("leftColumn").getChildWithName("widthComponent");
@@ -498,23 +527,34 @@ void DelayAudioProcessor::updateDelayParameters(float bpm)
         notesLength = param->choices[selectedIndex].toStdString();
     }
 
-    //  float pan = *parameters.getRawParameterValue("pan");
-
     auto gainProcessor = dynamic_cast<GainProcessor *>(gainNode->getProcessor());
     if (gainProcessor != nullptr)
     {
         gainProcessor->setGain(gain);
     }
+
     auto delayProcessor = dynamic_cast<DelayPingPongProcessor *>(delayNode->getProcessor());
     if (delayProcessor != nullptr)
     {
-
-        //  delayProcessor->setDelay(delay);
+        if (switchDelay == 1)
+        {
+            float delay = *parameters.getRawParameterValue("delaytime");
+            delayProcessor->setDelay(delay);
+        }
+        else
+        {
+            delayProcessor->setNotesLength(notesLength, bpm);
+        }
 
         delayProcessor->setFeedBack(feedback);
-        // delayProcessor->setPan(pan);
         delayProcessor->setWidth(width);
-        delayProcessor->setNotesLength(notesLength, bpm);
+    }
+
+    int manualPan = *parameters.getRawParameterValue("manualPan");
+    if (manualPan == 1)
+    {
+        pan = *parameters.getRawParameterValue("pan");
+        delayProcessor->setPan(pan);
     }
     auto mixerProcessor = dynamic_cast<DryWetMixer *>(mixerNode->getProcessor());
     if (mixerProcessor != nullptr)
@@ -527,27 +567,27 @@ void DelayAudioProcessor::updateDelayParameters(float bpm)
 void DelayAudioProcessor::getStateInformation(juce::MemoryBlock &destData)
 {
     // Create an XML element that represents the plugin's current state
-    // auto state = parameters.copyState();
-    // std::unique_ptr<juce::XmlElement> xml (state.createXml());
+    auto state = parameters.copyState();
+    std::unique_ptr<juce::XmlElement> xml(state.createXml());
 
-    // // Use this helper function to stuff it into the binary blob and return it
-    // copyXmlToBinary (*xml, destData);
+    // Use this helper function to stuff it into the binary blob and return it
+    copyXmlToBinary(*xml, destData);
 }
 
 void DelayAudioProcessor::setStateInformation(const void *data, int sizeInBytes)
 {
     // // This getXmlFromBinary helper function retrieves our XML from the binary blob
-    // std::unique_ptr<juce::XmlElement> xmlState (getXmlFromBinary (data, sizeInBytes));
+    std::unique_ptr<juce::XmlElement> xmlState(getXmlFromBinary(data, sizeInBytes));
 
-    // if (xmlState.get() != nullptr)
-    // {
-    //     // Make sure that it's actually our type of XML object
-    //     if (xmlState->hasTagName (parameters.state.getType()))
-    //     {
-    //         // Now reload our plugin's state from the XML object
-    //         parameters.replaceState (juce::ValueTree::fromXml (*xmlState));
-    //     }
-    // }
+    if (xmlState.get() != nullptr)
+    {
+        // Make sure that it's actually our type of XML object
+        if (xmlState->hasTagName(parameters.state.getType()))
+        {
+            // Now reload our plugin's state from the XML object
+            parameters.replaceState(juce::ValueTree::fromXml(*xmlState));
+        }
+    }
 }
 
 //==============================================================================

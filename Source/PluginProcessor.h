@@ -15,7 +15,7 @@
  
 
  const static      juce::StringArray notesValues = { "1/2", "1/4", "1/8", "1/16", "1/32" };
-
+  const static     juce::StringArray PINGPONG_STYLE = { "Linear", "Sinus", "MadSin" };
 //==============================================================================
 
 class DelayAudioProcessor  : public foleys::MagicProcessor
@@ -39,10 +39,12 @@ public:
 void initialiseBuilder(foleys::MagicGUIBuilder& builder) override;
     void processBlock (juce::AudioBuffer<float>&, juce::MidiBuffer&) override;
 
+    void updateGUI();
 
     //==============================================================================
     const juce::String getName() const override;
     void connectNodes ();
+    void debugNodes();
 
     void changeSliderParameter(const juce::String &sliderID, const juce::String &newParameterID);
 
@@ -85,10 +87,11 @@ private:
   juce::AudioProcessorGraph::Node::Ptr delayNode;
   juce::AudioProcessorGraph::Node::Ptr gainNode;
     juce::AudioProcessorGraph::Node::Ptr mixerNode;
+    double bpm = 100.0f;
 
-
+      int switchPingPong = 0;
         float inputVolume = 0.0f;
-  
+        int switchDelay = 0;
         foleys::MagicPlotSource* analyser = nullptr;
         foleys::MagicPlotSource* analyserOutput = nullptr;
         float pan = 0.0f;
