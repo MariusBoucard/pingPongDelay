@@ -24,7 +24,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
     layout.add(std::make_unique<juce::AudioParameterInt>(juce::ParameterID{"switchDelay", 1}, "switch delay", 0, 1, 0));
 
     layout.add(std::make_unique<juce::AudioParameterChoice>(juce::ParameterID{"pingpongnotes", 1}, "Ping Pong Speed", notesValues, 0));
-    layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"pingpongtime", 1}, "Ping Pong Time", 0.1f, 200.0f, 500.0f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"pingpongtime", 1}, "Ping Pong Time", 0.1f, 2000.0f, 500.0f));
     layout.add(std::make_unique<juce::AudioParameterChoice>(juce::ParameterID{"pingpongstyle", 1}, "Ping Pong Style", PINGPONG_STYLE, 0));
     layout.add(std::make_unique<juce::AudioParameterInt>(juce::ParameterID{"switchpingpong", 1}, "switch ping pong", 0, 1, 0));
 
@@ -241,23 +241,29 @@ juce::ValueTree findChildWithProperty(const juce::ValueTree &tree, const juce::I
 
     return juce::ValueTree();
 }
-
-/**
- * Function to change a parameter for a slider
- */
-void DelayAudioProcessor::changeSliderParameter(const juce::String &sliderID, const juce::String &newParameterName)
-{
-    auto sliderValueTree = findChildWithProperty(magicState.getGuiTree(), "id", sliderID);
-    // printValueTree(sliderValueTree);
-
-    if (sliderValueTree.isValid())
+  void DelayAudioProcessor::changeSliderParameter(const juce::String &sliderID, const juce::String &newParameterName)
     {
-        sliderValueTree.setProperty("parameter", newParameterName, nullptr);
+        // Store the new parameter name and slider ID
+        pendingSliderID = sliderID;
+        pendingParameterName = newParameterName;
+
+        // Trigger an asynchronous update
+        triggerAsyncUpdate();
     }
-    else
+
+
+ void DelayAudioProcessor::handleAsyncUpdate() 
     {
+        // Change the slider parameter on the message thread
+        auto slider = findChildWithProperty(magicState.getGuiTree(), "id", pendingSliderID);
+        if (slider.isValid())
+        {
+            juce::var varParameterName = juce::var(pendingParameterName);
+            slider.setProperty("parameter", varParameterName, nullptr);
+        }
     }
-}
+
+
 
 DelayAudioProcessor::~DelayAudioProcessor()
 {

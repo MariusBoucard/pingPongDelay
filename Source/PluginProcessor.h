@@ -18,7 +18,7 @@
   const static     juce::StringArray PINGPONG_STYLE = { "Linear", "Sinus", "MadSin" };
 //==============================================================================
 
-class DelayAudioProcessor  : public foleys::MagicProcessor
+class DelayAudioProcessor  : public foleys::MagicProcessor,  private juce::AsyncUpdater
                       /*      #if JucePlugin_Enable_ARA
                              , public juce::AudioProcessorARAExtension
                             #endif*/
@@ -45,6 +45,8 @@ void initialiseBuilder(foleys::MagicGUIBuilder& builder) override;
     const juce::String getName() const override;
     void connectNodes ();
     void debugNodes();
+
+    void handleAsyncUpdate() override;
 
     void changeSliderParameter(const juce::String &sliderID, const juce::String &newParameterID);
 
@@ -96,6 +98,9 @@ private:
         foleys::MagicPlotSource* analyserOutput = nullptr;
         float pan = 0.0f;
             std::atomic<double> widthComponent;
+            
+    juce::String pendingSliderID;
+    juce::String pendingParameterName;
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DelayAudioProcessor)
 };
