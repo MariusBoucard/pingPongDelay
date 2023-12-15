@@ -64,7 +64,7 @@ DelayAudioProcessor::DelayAudioProcessor()
     if (file.existsAsFile())
         magicState.setGuiValueTree(file);
     else
-        magicState.setGuiValueTree(BinaryData::magictest_xml, BinaryData::magictest_xmlSize);
+        magicState.setGuiValueTree(BinaryData::magic_xml, BinaryData::magic_xmlSize);
     analyser = magicState.createAndAddObject<foleys::MagicAnalyser>("input");
     analyserOutput = magicState.createAndAddObject<foleys::MagicAnalyser>("output");
     magicState.setPlayheadUpdateFrequency(30);
@@ -261,6 +261,11 @@ juce::ValueTree findChildWithProperty(const juce::ValueTree &tree, const juce::I
             juce::var varParameterName = juce::var(pendingParameterName);
             slider.setProperty("parameter", varParameterName, nullptr);
         }
+     
+        // Update the factor of fanComponent with the value of width
+        juce::String fanCompID = "balibalo";
+        auto fanComp = findChildWithProperty(magicState.getGuiTree(), "id", fanCompID);
+        fanComp.setProperty("factor", (double)(*parameters.getRawParameterValue("width")),nullptr);
     }
 
 
@@ -502,6 +507,8 @@ void DelayAudioProcessor::updateGUI()
     {
         changeSliderParameter("pingPongSlider", "pingpongnotes");
     }
+    
+    
 }
 void DelayAudioProcessor::updateDelayParameters(float bpm)
 {

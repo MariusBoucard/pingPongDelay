@@ -25,7 +25,7 @@ public:
 
     void setFactor(float f)
     {
-        factor = 0.0f;
+        factor = f;
     }
     float getFactor()
     {
