@@ -481,6 +481,7 @@ void DelayAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer, juce::M
 }
 void DelayAudioProcessor::updateGUI()
 {
+    
     switchDelay = *parameters.getRawParameterValue("switchDelay");
 
     if (switchDelay == 1)
