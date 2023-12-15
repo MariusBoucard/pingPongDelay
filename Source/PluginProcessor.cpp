@@ -69,8 +69,12 @@ DelayAudioProcessor::DelayAudioProcessor()
     analyserOutput = magicState.createAndAddObject<foleys::MagicAnalyser>("output");
     magicState.setPlayheadUpdateFrequency(30);
     audioGraph.clear();
-    // DelayAudioProcessor::connectNodes();
-    DelayAudioProcessor::debugNodes();
+      audioGraph.setPlayConfigDetails(getTotalNumInputChannels(),
+                                getTotalNumOutputChannels(),
+                                   getSampleRate(),
+                                   getBlockSize());
+     DelayAudioProcessor::connectNodes();
+   // DelayAudioProcessor::debugNodes();
 }
 
 void DelayAudioProcessor::debugNodes(){
