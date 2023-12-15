@@ -18,8 +18,6 @@
         <GROUP id="{510BC08D-9381-AAF4-6086-89637514B95F}" name="nodes">
           <FILE id="XmWGK8" name="delayPingPongProcessor.h" compile="0" resource="0"
                 file="Source/audioGraph/nodes/delayPingPongProcessor.h"/>
-          <FILE id="NHelRo" name="delayProcessor.h" compile="0" resource="0"
-                file="Source/audioGraph/nodes/delayProcessor.h"/>
           <FILE id="bhQk8R" name="DryWetMixer.h" compile="0" resource="0" file="Source/audioGraph/nodes/DryWetMixer.h"/>
           <FILE id="qe7ozp" name="gainProcessor.h" compile="0" resource="0" file="Source/audioGraph/nodes/gainProcessor.h"/>
         </GROUP>
@@ -27,7 +25,6 @@
       <GROUP id="{7129F463-6DC7-1224-99AF-4C78ACD2D148}" name="faustDSP">
         <FILE id="zDAKuc" name="EchoMonoToStereo.h" compile="0" resource="0"
               file="Source/faustDSP/EchoMonoToStereo.h"/>
-        <FILE id="A0HZcg" name="FaustEffect.h" compile="0" resource="0" file="Source/faustDSP/FaustEffect.h"/>
         <FILE id="thDtN7" name="Echo.h" compile="0" resource="0" file="Source/faustDSP/Echo.h"/>
         <FILE id="ekLxla" name="PingPongFaust.cpp" compile="1" resource="0"
               file="Source/faustDSP/PingPongFaust.cpp"/>

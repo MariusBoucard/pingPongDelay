@@ -13,6 +13,13 @@ This program is a default template to help you implement a beautifull gui on the
     As well, we will need to create interface for parameters and setters and all
     Define an abstract standard
 
+    As Toggle bow ain't working, will have to work with slider to perform change on the buttons between time and notes mode
+
+    Add all the different ping pong modes
+
+    Refactor GUI
+
+    
 ## Use it
     To use this code and play with, install juce, add the relevant foleys librairy gui module and clone this repository.
     Then every thing should work.

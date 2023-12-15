@@ -13,7 +13,6 @@
 #include "audioGraph/nodes/gainProcessor.h"
 #include "audioGraph/nodes/DryWetMixer.h"
 #include "Components/LissajourComponent.h"
-
 //==============================================================================
 
 juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
@@ -22,16 +21,17 @@ juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
     // Add a ComboBox parameter for the slider
     layout.add(std::make_unique<juce::AudioParameterChoice>(juce::ParameterID{"noteslength", 1}, "note Time", notesValues, 0));
     layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"delaytime", 1}, "Delay Time", 1.0f, 2000.0f, 500.0f));
+    layout.add(std::make_unique<juce::AudioParameterInt>(juce::ParameterID{"switchDelay", 1}, "switch delay", 0, 1, 0));
 
     layout.add(std::make_unique<juce::AudioParameterChoice>(juce::ParameterID{"pingpongspeed", 1}, "Ping Pong Speed", notesValues, 0));
-    layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"pingpongtime", 1}, "Ping Pong Time", 1.0f, 2000.0f, 500.0f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"pingpongtime", 1}, "Ping Pong Time", -10.0f, 200.0f, 500.0f));
+    layout.add(std::make_unique<juce::AudioParameterInt>(juce::ParameterID{"switchpingpong", 1}, "switch ping pong", 0, 1, 0));
 
     // Add other parameters...
     layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"gain", 1}, "Gain", 0.0f, 1.0f, 1.0f));
     layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"feedback", 1}, "FeedBack", 0.0f, 0.99f, 0.5f));
     layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"mix", 1}, "Mix", 0.0f, 1.0f, 0.5f));
-    layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"width", 1}, "Width", 0, 1.0f, 0.0f));
-
+    layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"width", 1}, "Width", 0, 1.0f, 0.69f));
     return layout;
 }
 
@@ -60,19 +60,15 @@ DelayAudioProcessor::DelayAudioProcessor()
     if (file.existsAsFile())
         magicState.setGuiValueTree(file);
     else
-        magicState.setGuiValueTree(BinaryData::magictest_xml, BinaryData::magictest_xmlSize);
-        // Create a FanItem and add it to the magicState
-            
+        //  findGuiItemWithId("widthComponent");
+    magicState.setGuiValueTree(BinaryData::magictest_xml, BinaryData::magictest_xmlSize);
+    // Create a FanItem and add it to the magicState
+    //  magicState.createAndAddObject<Fan>("fan");
     analyser = magicState.createAndAddObject<foleys::MagicAnalyser>("input");
-    widthComponent = magicState.createAndAddObject<Fan>("fan");
     analyserOutput = magicState.createAndAddObject<foleys::MagicAnalyser>("output");
     magicState.setPlayheadUpdateFrequency(30);
 
     audioGraph.clear();
-    audioGraph.setPlayConfigDetails(getTotalNumInputChannels(),
-                                    getTotalNumOutputChannels(),
-                                    getSampleRate(),
-                                    getBlockSize());
 
     // Connect the output of the first node to the input of the second
     DelayAudioProcessor::connectNodes();
@@ -170,6 +166,53 @@ MAKE A MIXER AROUND ANOTHER NODE
     }
 }
 
+void printValueTree(const juce::ValueTree& tree, const juce::String& indent = "")
+{
+    std::cout << indent << "ValueTree: " << tree.getType().toString() << std::endl;
+
+    for (int i = 0; i < tree.getNumProperties(); ++i)
+    {
+        const auto& property = tree.getPropertyName(i);
+        std::cout << indent << "  Property: " << property.toString() << " = " << tree[property].toString() << std::endl;
+    }
+
+    for (int i = 0; i < tree.getNumChildren(); ++i)
+    {
+        printValueTree(tree.getChild(i), indent + "  ");
+    }
+}
+
+// SUPER IMPORTANT
+    juce::ValueTree findChildWithProperty(const juce::ValueTree& tree, const juce::Identifier& property, const juce::var& value)
+    {
+        if (tree.hasProperty(property) && tree[property] == value)
+            return tree;
+
+        for (int i = 0; i < tree.getNumChildren(); ++i)
+        {
+            juce::ValueTree child = tree.getChild(i);
+            juce::ValueTree result = findChildWithProperty(child, property, value);
+            if (result.isValid())
+                return result;
+        }
+
+        return juce::ValueTree();
+    }
+
+void DelayAudioProcessor::changeSliderParameter(const juce::String& sliderID, const juce::String& newParameterID)
+{
+    auto sliderValueTree = findChildWithProperty(magicState.getGuiTree(),"id","delaySlider");
+    // printValueTree(magicState.getGuiTree());
+    printValueTree(sliderValueTree);
+    if (sliderValueTree.isValid())
+    {
+        std::cout << "Damn on l a "<< std::endl;
+    }
+    else {
+        std::cout << "Damn on l a pas "<< std::endl;
+    }
+}
+
 DelayAudioProcessor::~DelayAudioProcessor()
 {
 }
@@ -178,7 +221,7 @@ void DelayAudioProcessor::initialiseBuilder(foleys::MagicGUIBuilder &builder)
     builder.registerJUCEFactories();
     builder.registerJUCELookAndFeels();
     builder.registerFactory("Lissajour", &LissajourItem::factory);
-    builder.registerFactory("Fan", &FanItem::factory);
+    builder.registerFactory("FanItem", &FanItem::factory);
 
     builder.registerLookAndFeel("slide", std::make_unique<LookAndFeelFirst>());
     builder.registerLookAndFeel("threshold", std::make_unique<LookAndFeelThreshold>());
@@ -213,6 +256,7 @@ bool DelayAudioProcessor::isMidiEffect() const
 #if JucePlugin_IsMidiEffect
     return true;
 #else
+
     return false;
 #endif
 }
@@ -246,43 +290,61 @@ void DelayAudioProcessor::changeProgramName(int index, const juce::String &newNa
 {
 }
 
-float DelayAudioProcessor::computePan(float bpm, float ppqPosition, float ppqMesure, float timeSecond, std::string panType, int timeSigDenominator, int timeSigNumerator) {
+float DelayAudioProcessor::computePan(float bpm, float ppqPosition, float ppqMesure, float timeSecond, std::string panType, int timeSigDenominator, int timeSigNumerator)
+{
+    
     // TODO ADD PARAMETER FOR PAN TYPE
     // TODO ADD PARAMETER FOR PAN TIME
-    
+
     double beatTime = 60.0f / bpm;
     double timeMesure = ppqMesure * beatTime;
     double pan = 0.0f;
 
-    if(panType == "linear"){
-            double delta = (timeSecond - timeMesure) / beatTime;
-            delta = (ppqPosition - ppqMesure)/timeSigNumerator;
-            // Delta should be between 0 and timeSigNumerator
-            // delta = delta/timeSigNumerator;
-            if(delta > 0.5f){
-                delta = 1.0f - delta;
-            }
+    if (panType == "linear")
+    {
+        double delta = (timeSecond - timeMesure) / beatTime;
+        delta = (ppqPosition - ppqMesure) / timeSigNumerator;
+        // Delta should be between 0 and timeSigNumerator
+        // delta = delta/timeSigNumerator;
+        if (delta > 0.5f)
+        {
+            delta = 1.0f - delta;
+        }
 
-            jassert(delta <= 1.0f && delta >= 0.0f);
-            
-            pan = delta*4.0f-1.0f;
+        jassert(delta <= 1.0f && delta >= 0.0f);
 
-            jassert(pan <= 1.0f && pan >= -1.0f);
+        pan = delta * 4.0f - 1.0f;
 
-    } else if (panType == "sin"){
-         double delta = std::fmod( ((*parameters.getRawParameterValue("delaytime") / 1000.0f))*0.5f+timeSecond, (*parameters.getRawParameterValue("delaytime") / 1000.0f))/ (*parameters.getRawParameterValue("delaytime") /1000.0f);    
-       
-    } else if (panType == "sinRandom") {
+        jassert(pan <= 1.0f && pan >= -1.0f);
+    }
+    else if (panType == "sin")
+    {
+        double delta = std::fmod(((*parameters.getRawParameterValue("delaytime") / 1000.0f)) * 0.5f + timeSecond, (*parameters.getRawParameterValue("delaytime") / 1000.0f)) / (*parameters.getRawParameterValue("delaytime") / 1000.0f);
+    }
+    else if (panType == "sinRandom")
+    {
         // VERSION SIN RANDOM
-        pan = std::sin( timeSecond * 2.0f * juce::MathConstants<float>::pi );
+        pan = std::sin(timeSecond * 2.0f * juce::MathConstants<float>::pi);
     }
     return pan;
 }
 
 
+
+    void DelayAudioProcessor::parameterChanged(const juce::String& parameterID, float newValue) 
+    {
+       // Could be usefull in the futur, but not now
+    }
+
+
+
+
 //==============================================================================
 void DelayAudioProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
 {
+    // if(auto pointer = dynamic_cast<foleys::MagicGUIBuilder*> (guiBuilder)){
+    //     pointer->clearGUI();
+    // }
     juce::dsp::ProcessSpec spec;
 
     spec.sampleRate = sampleRate;
@@ -328,7 +390,7 @@ bool DelayAudioProcessor::isBusesLayoutSupported(const BusesLayout &layouts) con
 #endif
 void DelayAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer, juce::MidiBuffer &midiMessages)
 {
-
+    changeSliderParameter("delaySlider", "delaytime");
     analyser->pushSamples(buffer);
 
     juce::ScopedNoDenormals noDenormals;
@@ -356,9 +418,6 @@ void DelayAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer, juce::M
         inputChannelData[1] = buffer.getReadPointer(1);
         outputChannelData[0] = buffer.getWritePointer(0);
         outputChannelData[1] = buffer.getWritePointer(1);
-
-        // Process the audio data with the Faust DSP object
-        //     fDSP.compute(buffer.getNumSamples(), const_cast<float**>(inputChannelData), outputChannelData);
     }
     double bpm = 100.0f;
 
@@ -367,27 +426,25 @@ void DelayAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer, juce::M
     {
         bpm = getPlayHead()->getPosition()->getBpm().orFallback(0.0);
         float ppqPosition = getPlayHead()->getPosition()->getPpqPosition().orFallback(0.0);
-        float   ppqMesure = getPlayHead()->getPosition()->getPpqPositionOfLastBarStart().orFallback(0.0);
+        float ppqMesure = getPlayHead()->getPosition()->getPpqPositionOfLastBarStart().orFallback(0.0);
         double timeSecond = getPlayHead()->getPosition()->getTimeInSeconds().orFallback(0.0);
 
         /**
          * Error with time signature optional
-        */
-    int timeSigDenominator = 4;
-    int timeSigNumerator = 4;
-    juce::Optional<juce::AudioPlayHead::TimeSignature> timsigFromHost = getPlayHead()->getPosition()->getTimeSignature();
-    if (timsigFromHost)
-    {
-        timeSigNumerator = timsigFromHost->numerator;
-        timeSigDenominator = timsigFromHost->denominator;
-    }
+         */
+        int timeSigDenominator = 4;
+        int timeSigNumerator = 4;
+        juce::Optional<juce::AudioPlayHead::TimeSignature> timsigFromHost = getPlayHead()->getPosition()->getTimeSignature();
+        if (timsigFromHost)
+        {
+            timeSigNumerator = timsigFromHost->numerator;
+            timeSigDenominator = timsigFromHost->denominator;
+        }
 
         std::string panType = "linear";
 
         // Retourne valeur entre -1 et 1, faire gaffe modelisation trajet
-        pan =   computePan(bpm, ppqPosition, ppqMesure, timeSecond, panType,timeSigDenominator,timeSigNumerator);
-
-
+        pan = computePan(bpm, ppqPosition, ppqMesure, timeSecond, panType, timeSigDenominator, timeSigNumerator);
     }
     updateDelayParameters(bpm);
     analyserOutput->pushSamples(buffer);
@@ -398,10 +455,29 @@ void DelayAudioProcessor::updateDelayParameters(float bpm)
     float delay = *parameters.getRawParameterValue("delaytime");
     float feedback = *parameters.getRawParameterValue("feedback");
     float gain = *parameters.getRawParameterValue("gain");
-    // auto* widthComponent = magicState.guiValueTree. .findComponent("width");
-    // float width = widthComponent->getFactor();
-    float width = *parameters.getRawParameterValue("width") ;
 
+    auto rootGui = magicState.getGuiTree();
+    float width = 0.39f;
+
+    //================== Not Working Code =================
+    // auto widthComponent = magicState.getGuiTree().getChildWithName("root").getChildWithName("container").getChildWithName("leftColumn").getChildWithName("widthComponent");
+
+    // if (widthComponent.isValid())
+    // {
+    //     // FanItem* fan = dynamic_cast<FanItem*>(widthComponent);
+    //     // width = fan->getFactor();
+    //     // width =  widthComponent.getPropertyAsValue("factor",nullptr).getValue();
+    //     *parameters.getRawParameterValue("width") = 0.3f;
+    //     // *parameters.getRawParameterValue("width") = width ;
+    // }
+    // else
+    // {
+    //     // width = *parameters.getRawParameterValue("width") ;
+    //     width = 0.5f;
+    //     *parameters.getRawParameterValue("width") = 0.5f;
+    // }
+
+    //================== Not Working Code =================
     std::string notesLength = "1/4";
     auto param = dynamic_cast<juce::AudioParameterChoice *>(parameters.getParameter("noteslength"));
     if (param != nullptr)
@@ -421,10 +497,11 @@ void DelayAudioProcessor::updateDelayParameters(float bpm)
     auto delayProcessor = dynamic_cast<DelayPingPongProcessor *>(delayNode->getProcessor());
     if (delayProcessor != nullptr)
     {
+
         //  delayProcessor->setDelay(delay);
 
         delayProcessor->setFeedBack(feedback);
-       // delayProcessor->setPan(pan);
+        // delayProcessor->setPan(pan);
         delayProcessor->setWidth(width);
         delayProcessor->setNotesLength(notesLength, bpm);
     }
@@ -432,45 +509,34 @@ void DelayAudioProcessor::updateDelayParameters(float bpm)
     if (mixerProcessor != nullptr)
     {
         mixerProcessor->setMix(*parameters.getRawParameterValue("mix"));
-        // fDSP.setParamValue("feedback", feedback);
-        //    delayProcessor_.setDelayP/arameters();
     }
 }
-// SUPPR HASEDITORS
-
-//
-
-// juce::AudioProcessorEditor* DelayAudioProcessor::createEditor()
-// {
-//     return new foleys::MagicPluginEditor(magicState,BinaryData::magic_xml,BinaryData::magic_xmlSize);
-//   return new DelayAudioProcessorEditor (*this);
-// }
 
 //==============================================================================
-void DelayAudioProcessor::getStateInformation (juce::MemoryBlock& destData)
+void DelayAudioProcessor::getStateInformation(juce::MemoryBlock &destData)
 {
     // Create an XML element that represents the plugin's current state
-    auto state = parameters.copyState();
-    std::unique_ptr<juce::XmlElement> xml (state.createXml());
+    // auto state = parameters.copyState();
+    // std::unique_ptr<juce::XmlElement> xml (state.createXml());
 
-    // Use this helper function to stuff it into the binary blob and return it
-    copyXmlToBinary (*xml, destData);
+    // // Use this helper function to stuff it into the binary blob and return it
+    // copyXmlToBinary (*xml, destData);
 }
 
-void DelayAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
+void DelayAudioProcessor::setStateInformation(const void *data, int sizeInBytes)
 {
-    // This getXmlFromBinary helper function retrieves our XML from the binary blob
-    std::unique_ptr<juce::XmlElement> xmlState (getXmlFromBinary (data, sizeInBytes));
+    // // This getXmlFromBinary helper function retrieves our XML from the binary blob
+    // std::unique_ptr<juce::XmlElement> xmlState (getXmlFromBinary (data, sizeInBytes));
 
-    if (xmlState.get() != nullptr)
-    {
-        // Make sure that it's actually our type of XML object
-        if (xmlState->hasTagName (parameters.state.getType()))
-        {
-            // Now reload our plugin's state from the XML object
-            parameters.replaceState (juce::ValueTree::fromXml (*xmlState));
-        }
-    }
+    // if (xmlState.get() != nullptr)
+    // {
+    //     // Make sure that it's actually our type of XML object
+    //     if (xmlState->hasTagName (parameters.state.getType()))
+    //     {
+    //         // Now reload our plugin's state from the XML object
+    //         parameters.replaceState (juce::ValueTree::fromXml (*xmlState));
+    //     }
+    // }
 }
 
 //==============================================================================

@@ -44,6 +44,8 @@ void initialiseBuilder(foleys::MagicGUIBuilder& builder) override;
     const juce::String getName() const override;
     void connectNodes ();
 
+    void changeSliderParameter(const juce::String &sliderID, const juce::String &newParameterID);
+
     bool acceptsMidi() const override;
     bool producesMidi() const override;
     bool isMidiEffect() const override;
@@ -73,7 +75,7 @@ void initialiseBuilder(foleys::MagicGUIBuilder& builder) override;
     juce::AudioProcessorValueTreeState parameters;
     float getInputVolume() const { return inputVolume; }
 
-
+    void parameterChanged(const juce::String& parameterID, float newValue);
 private:
   juce::AudioProcessorGraph audioGraph;
 
@@ -86,15 +88,11 @@ private:
 
 
         float inputVolume = 0.0f;
-   // void initialiseBuilder(foleys::MagicGUIBuilder& builder);
-    //==============================================================================
-    // Your private member variables go here...
+  
         foleys::MagicPlotSource* analyser = nullptr;
         foleys::MagicPlotSource* analyserOutput = nullptr;
-        Fan* widthComponent = nullptr;
         float pan = 0.0f;
-        // mydsp fDSP;
-      // foleys::MagicProcessorState magicState { *this };
+            std::atomic<double> widthComponent;
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DelayAudioProcessor)
 };

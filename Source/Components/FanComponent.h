@@ -27,7 +27,7 @@ public:
     {
         factor = 0.0f;
     }
-    int getFactor()
+    float getFactor()
     {
         return factor;
     }
@@ -79,10 +79,7 @@ public:
 private:
     void timerCallback() override
     {
-        phase += 0.1f;
-        if (phase >= juce::MathConstants<float>::twoPi)
-            phase -= juce::MathConstants<float>::twoPi;
-
+      
         repaint();
     }
 
@@ -99,6 +96,7 @@ public:
 
     FanItem(foleys::MagicGUIBuilder &builder, const juce::ValueTree &node) : foleys::GuiItem(builder, node)
     {
+    
         // Create the colour names to have them configurable
         setColourTranslation({{"lissajour-background", Fan::backgroundColourId},
                               {"lissajour-draw", Fan::drawColourId},
@@ -106,28 +104,33 @@ public:
 
         addAndMakeVisible(fan);
     }
+    void setFactor(float f)
+    {
+        fan.setFactor(f);
+    }
+    float getFactor()
+    {
+        return fan.getFactor();
+    }
 
     std::vector<foleys::SettableProperty> getSettableProperties() const override
     {
         std::vector<foleys::SettableProperty> newProperties;
 
-        newProperties.push_back({configNode, "factor", foleys::SettableProperty::Number, 1.0f, {}});
+        newProperties.push_back(
+            {configNode, "factor", foleys::SettableProperty::Number, 1.0f, {}}
+            );
 
         return newProperties;
     }
 
     // Override update() to set the values to your custom component
-    void update() override
+    void update() override  
     {
         auto factor = getProperty("factor");
         fan.setFactor(factor);
-
-        // fan.setFactor(factor.isVoid() ? 3.0f : float(factor));
     }
-    // int getFactor()
-    // {
-    //     return fan.getFactor();
-    // }
+
 
     juce::Component *getWrappedComponent() override
     {

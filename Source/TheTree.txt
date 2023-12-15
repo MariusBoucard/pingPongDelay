@@ -1,0 +1,124 @@
+ValueTree: magic
+  ValueTree: Styles
+    ValueTree: Style
+      Property: name = default
+      ValueTree: Nodes
+      ValueTree: Classes
+        ValueTree: plot-view
+          Property: border = 2
+          Property: background-color = black
+          Property: border-color = silver
+          Property: display = contents
+        ValueTree: nomargin
+          Property: margin = 0
+          Property: padding = 0
+          Property: border = 0
+        ValueTree: group
+          Property: margin = 5
+          Property: padding = 5
+          Property: border = 2
+          Property: flex-direction = column
+        ValueTree: transparent
+          Property: background-color = transparentblack
+      ValueTree: Types
+        ValueTree: Slider
+          Property: border = 0
+          Property: slider-textbox = textbox-below
+        ValueTree: ToggleButton
+          Property: border = 0
+          Property: max-height = 50
+          Property: caption-size = 0
+          Property: text = Active
+        ValueTree: TextButton
+          Property: border = 0
+          Property: max-height = 50
+          Property: caption-size = 0
+        ValueTree: ComboBox
+          Property: border = 0
+          Property: max-height = 50
+          Property: caption-size = 0
+        ValueTree: Plot
+          Property: border = 0
+          Property: margin = 0
+          Property: padding = 0
+          Property: background-color = 00000000
+          Property: radius = 0
+        ValueTree: XYDragComponent
+          Property: border = 0
+          Property: margin = 0
+          Property: padding = 0
+          Property: background-color = 00000000
+          Property: radius = 0
+      ValueTree: Palettes
+        ValueTree: default
+  ValueTree: View
+    Property: id = root
+    Property: resizable = 1
+    Property: resize-corner = 1
+    Property: background-color = FF00FF0D
+    Property: border-color =
+    Property: aspect =
+    Property: tooltip-background = FFC92323
+    Property: class = nomargin
+    Property: lookAndFeel = LookAndFeel_V1
+    Property: background-alpha = 0
+    Property: caption-placement = centred
+    Property: background-image = space_jpg
+    Property: height = 500
+    Property: width = 800
+    ValueTree: View
+      Property: background-image = space_jpg
+      Property: id = container
+      ValueTree: View
+        Property: background-color = 00FF0000
+        Property: flex-direction = column
+        Property: id = leftColumn
+        ValueTree: FanItem
+          Property: factor = width
+          Property: id = widthComponent
+        ValueTree: Plot
+          Property: source = input
+        ValueTree: Plot
+          Property: source = output
+      ValueTree: View
+        Property: background-color = 00FF7D7D
+        Property: display = flexbox
+        Property: flex-direction = column
+        ValueTree: View
+          Property: background-color = 00000000
+          ValueTree: Slider
+            Property: caption = Feed Back
+            Property: id = feedback
+            Property: parameter = feedback
+            Property: lookAndFeel = slide
+            Property: background-color = 00000000
+          ValueTree: Slider
+            Property: parameter = gain
+            Property: id = predelaySlider
+            Property: caption = Gain
+            Property: lookAndFeel = slide
+            Property: background-color = 00000000
+        ValueTree: Slider
+          Property: parameter = switchpingpong
+          Property: caption = Switch ping pong
+        ValueTree: Slider
+          Property: parameter = noteslength
+          Property: caption = Note length
+          Property: id = delaySlider
+        ValueTree: Slider
+          Property: parameter = width
+          Property: class = transparent
+          Property: id = Width
+          Property: caption = Width
+        ValueTree: Slider
+          Property: parameter = delaytime
+          Property: id = delaytime
+          Property: caption = Delay Time
+          Property: padding =
+          Property: lookAndFeel = slide
+          Property: margin = 0 110 0 110
+          Property: background-color = 00FFFFFF
+        ValueTree: Slider
+          Property: parameter = mix
+          Property: class = transparent
+          Property: caption = Mix
