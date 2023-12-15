@@ -199,17 +199,20 @@ void printValueTree(const juce::ValueTree& tree, const juce::String& indent = ""
         return juce::ValueTree();
     }
 
-void DelayAudioProcessor::changeSliderParameter(const juce::String& sliderID, const juce::String& newParameterID)
+
+/**
+ * Function to change a parameter for a slider
+*/
+void DelayAudioProcessor::changeSliderParameter(const juce::String& sliderID, const juce::String& newParameterName)
 {
-    auto sliderValueTree = findChildWithProperty(magicState.getGuiTree(),"id","delaySlider");
-    // printValueTree(magicState.getGuiTree());
-    printValueTree(sliderValueTree);
+    auto sliderValueTree = findChildWithProperty(magicState.getGuiTree(),"id",sliderID);
+    // printValueTree(sliderValueTree);
+
     if (sliderValueTree.isValid())
     {
-        std::cout << "Damn on l a "<< std::endl;
+     sliderValueTree.setProperty("parameter", newParameterName, nullptr);
     }
     else {
-        std::cout << "Damn on l a pas "<< std::endl;
     }
 }
 
@@ -390,7 +393,6 @@ bool DelayAudioProcessor::isBusesLayoutSupported(const BusesLayout &layouts) con
 #endif
 void DelayAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer, juce::MidiBuffer &midiMessages)
 {
-    changeSliderParameter("delaySlider", "delaytime");
     analyser->pushSamples(buffer);
 
     juce::ScopedNoDenormals noDenormals;
@@ -458,6 +460,15 @@ void DelayAudioProcessor::updateDelayParameters(float bpm)
 
     auto rootGui = magicState.getGuiTree();
     float width = 0.39f;
+
+    float switchDelay = *parameters.getRawParameterValue("switchDelay");
+    
+    if(switchDelay == 1){
+        changeSliderParameter("delaySlider", "delaytime");
+    } else {
+        changeSliderParameter("delaySlider", "noteslength");
+    }
+
 
     //================== Not Working Code =================
     // auto widthComponent = magicState.getGuiTree().getChildWithName("root").getChildWithName("container").getChildWithName("leftColumn").getChildWithName("widthComponent");
