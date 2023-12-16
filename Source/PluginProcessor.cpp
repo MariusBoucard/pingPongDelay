@@ -13,6 +13,7 @@
 #include "audioGraph/nodes/gainProcessor.h"
 #include "audioGraph/nodes/DryWetMixer.h"
 #include "Components/LissajourComponent.h"
+#include "Components/AnimPingPongComponent.h"
 //==============================================================================
 
 juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
@@ -279,6 +280,7 @@ void DelayAudioProcessor::initialiseBuilder(foleys::MagicGUIBuilder &builder)
     builder.registerJUCELookAndFeels();
     builder.registerFactory("Lissajour", &LissajourItem::factory);
     builder.registerFactory("FanItem", &FanItem::factory);
+    builder.registerFactory("Animation", &AnimationItem::factory);
 
     builder.registerLookAndFeel("slide", std::make_unique<LookAndFeelFirst>());
     builder.registerLookAndFeel("threshold", std::make_unique<LookAndFeelThreshold>());

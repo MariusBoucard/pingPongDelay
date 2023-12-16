@@ -8,9 +8,9 @@
 #pragma once
 
 #include <JuceHeader.h>
-#include "resources/HorizontalLineSource.h"
-#include "resources/CompressionValue.h"
-#include "components/FanComponent.h"
+#include "Resources/HorizontalLineSource.h"
+#include "Resources/CompressionValue.h"
+#include "Components/FanComponent.h"
 // #include "faustDSP/FaustEffect.h"
  
 
