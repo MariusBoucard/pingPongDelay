@@ -266,7 +266,14 @@ juce::ValueTree findChildWithProperty(const juce::ValueTree &tree, const juce::I
         // Update the factor of fanComponent with the value of width
         juce::String fanCompID = "balibalo";
         auto fanComp = findChildWithProperty(magicState.getGuiTree(), "id", fanCompID);
-        fanComp.setProperty("factor", (double)(*parameters.getRawParameterValue("width")),nullptr);
+
+        // -> Binding slider to component
+    //      fanComp.setProperty("factor", (double)(*parameters.getRawParameterValue("width")),nullptr);
+
+    //    // -> Binding component to slider
+        juce::var factor_gui_value=  fanComp.getPropertyAsValue("factor",nullptr);
+        parameters.getParameterAsValue("width") = factor_gui_value;
+ 
     }
 
 

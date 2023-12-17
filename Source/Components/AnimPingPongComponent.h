@@ -43,7 +43,7 @@ public:
         
         // draw pingpong
         
-        std::cout << indice;
+        //std::cout << indice;
         juce::Image image = images.getReference(indice);
         g.drawImage(image, getLocalBounds().getX(), getLocalBounds().getY(), getWidth(), getHeight(),0,0, image.getWidth(), image.getHeight());
 

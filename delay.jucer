@@ -9,10 +9,16 @@
     <GROUP id="{B89B3AD5-672E-35AE-9240-8A0B1C0D04FE}" name="New Group"/>
     <GROUP id="{0F9FA3F7-84DA-F429-6784-0B979A73E54A}" name="New Group"/>
     <GROUP id="{DD661678-B72A-E686-D3DB-3AABD9675267}" name="Source">
+      <FILE id="v5SPvu" name="magic.xml" compile="0" resource="1" file="Source/magic.xml"/>
       <GROUP id="{D59AADE1-572C-CAB9-A66F-8B85235A0863}" name="Components">
+        <GROUP id="{B50D8659-B899-FD48-935A-CBD9B6330730}" name="New Group"/>
+        <FILE id="PCW1KY" name="AnimPingPongComponent.h" compile="0" resource="0"
+              file="Source/Components/AnimPingPongComponent.h"/>
         <FILE id="rIhsEP" name="FanComponent.h" compile="0" resource="0" file="Source/Components/FanComponent.h"/>
         <FILE id="DHdYbf" name="LissajourComponent.h" compile="0" resource="0"
               file="Source/Components/LissajourComponent.h"/>
+        <FILE id="JIHXOC" name="StarDanceComponent.h" compile="0" resource="0"
+              file="Source/Components/StarDanceComponent.h"/>
       </GROUP>
       <GROUP id="{D00F6FCC-4839-9728-514E-A021911933BC}" name="audioGraph">
         <GROUP id="{510BC08D-9381-AAF4-6086-89637514B95F}" name="nodes">
@@ -30,6 +36,67 @@
               file="Source/faustDSP/PingPongFaust.cpp"/>
       </GROUP>
       <GROUP id="{559436F1-1671-1E40-B396-EEBD0C13A0EE}" name="resources">
+        <GROUP id="{0C45BDCF-4BDD-5AD9-BFD6-102020403634}" name="animation_pp">
+          <FILE id="faXAaA" name="frame_0.jpg" compile="0" resource="1" file="Source/resources/animation_pp/frame_0.jpg"/>
+          <FILE id="cvOhtB" name="frame_1.jpg" compile="0" resource="1" file="Source/resources/animation_pp/frame_1.jpg"/>
+          <FILE id="w0e91X" name="frame_2.jpg" compile="0" resource="1" file="Source/resources/animation_pp/frame_2.jpg"/>
+          <FILE id="PfP5Tu" name="frame_3.jpg" compile="0" resource="1" file="Source/resources/animation_pp/frame_3.jpg"/>
+          <FILE id="LJbANg" name="frame_4.jpg" compile="0" resource="1" file="Source/resources/animation_pp/frame_4.jpg"/>
+          <FILE id="StdWph" name="frame_5.jpg" compile="0" resource="1" file="Source/resources/animation_pp/frame_5.jpg"/>
+          <FILE id="F5gQZE" name="frame_6.jpg" compile="0" resource="1" file="Source/resources/animation_pp/frame_6.jpg"/>
+          <FILE id="LKUrRa" name="frame_7.jpg" compile="0" resource="1" file="Source/resources/animation_pp/frame_7.jpg"/>
+          <FILE id="HTUnNU" name="frame_8.jpg" compile="0" resource="1" file="Source/resources/animation_pp/frame_8.jpg"/>
+          <FILE id="C1fvI9" name="frame_9.jpg" compile="0" resource="1" file="Source/resources/animation_pp/frame_9.jpg"/>
+          <FILE id="vcGQhH" name="frame_10.jpg" compile="0" resource="1" file="Source/resources/animation_pp/frame_10.jpg"/>
+          <FILE id="BxmCuA" name="frame_11.jpg" compile="0" resource="1" file="Source/resources/animation_pp/frame_11.jpg"/>
+          <FILE id="I45rzR" name="frame_12.jpg" compile="0" resource="1" file="Source/resources/animation_pp/frame_12.jpg"/>
+          <FILE id="yP7sLF" name="frame_13.jpg" compile="0" resource="1" file="Source/resources/animation_pp/frame_13.jpg"/>
+          <FILE id="buooDL" name="frame_14.jpg" compile="0" resource="1" file="Source/resources/animation_pp/frame_14.jpg"/>
+          <FILE id="iHHNji" name="frame_15.jpg" compile="0" resource="1" file="Source/resources/animation_pp/frame_15.jpg"/>
+          <FILE id="jJnYM0" name="frame_16.jpg" compile="0" resource="1" file="Source/resources/animation_pp/frame_16.jpg"/>
+          <FILE id="vaHrmo" name="frame_17.jpg" compile="0" resource="1" file="Source/resources/animation_pp/frame_17.jpg"/>
+          <FILE id="B2031d" name="frame_18.jpg" compile="0" resource="1" file="Source/resources/animation_pp/frame_18.jpg"/>
+          <FILE id="hJpuF6" name="frame_19.jpg" compile="0" resource="1" file="Source/resources/animation_pp/frame_19.jpg"/>
+          <FILE id="RMK0mc" name="frame_20.jpg" compile="0" resource="1" file="Source/resources/animation_pp/frame_20.jpg"/>
+          <FILE id="SGoim5" name="frame_21.jpg" compile="0" resource="1" file="Source/resources/animation_pp/frame_21.jpg"/>
+          <FILE id="sX9v3o" name="frame_22.jpg" compile="0" resource="1" file="Source/resources/animation_pp/frame_22.jpg"/>
+          <FILE id="yryvpB" name="frame_23.jpg" compile="0" resource="1" file="Source/resources/animation_pp/frame_23.jpg"/>
+          <FILE id="n0ORtj" name="frame_24.jpg" compile="0" resource="1" file="Source/resources/animation_pp/frame_24.jpg"/>
+          <FILE id="oa1ZQL" name="frame_25.jpg" compile="0" resource="1" file="Source/resources/animation_pp/frame_25.jpg"/>
+          <FILE id="ymQAkM" name="frame_26.jpg" compile="0" resource="1" file="Source/resources/animation_pp/frame_26.jpg"/>
+          <FILE id="ryWogd" name="frame_27.jpg" compile="0" resource="1" file="Source/resources/animation_pp/frame_27.jpg"/>
+          <FILE id="I7z4Jd" name="frame_28.jpg" compile="0" resource="1" file="Source/resources/animation_pp/frame_28.jpg"/>
+          <FILE id="PTiZOY" name="frame_29.jpg" compile="0" resource="1" file="Source/resources/animation_pp/frame_29.jpg"/>
+          <FILE id="ZBeLaq" name="frame_30.jpg" compile="0" resource="1" file="Source/resources/animation_pp/frame_30.jpg"/>
+          <FILE id="kI8cfc" name="frame_31.jpg" compile="0" resource="1" file="Source/resources/animation_pp/frame_31.jpg"/>
+          <FILE id="ixSjqJ" name="frame_32.jpg" compile="0" resource="1" file="Source/resources/animation_pp/frame_32.jpg"/>
+          <FILE id="RBmML3" name="frame_33.jpg" compile="0" resource="1" file="Source/resources/animation_pp/frame_33.jpg"/>
+          <FILE id="FVBMx1" name="frame_34.jpg" compile="0" resource="1" file="Source/resources/animation_pp/frame_34.jpg"/>
+          <FILE id="Q8do5O" name="frame_35.jpg" compile="0" resource="1" file="Source/resources/animation_pp/frame_35.jpg"/>
+          <FILE id="PPu6D2" name="frame_36.jpg" compile="0" resource="1" file="Source/resources/animation_pp/frame_36.jpg"/>
+          <FILE id="rOhKIB" name="frame_37.jpg" compile="0" resource="1" file="Source/resources/animation_pp/frame_37.jpg"/>
+          <FILE id="a586Az" name="frame_38.jpg" compile="0" resource="1" file="Source/resources/animation_pp/frame_38.jpg"/>
+          <FILE id="TssoCD" name="frame_39.jpg" compile="0" resource="1" file="Source/resources/animation_pp/frame_39.jpg"/>
+          <FILE id="BtLcij" name="frame_40.jpg" compile="0" resource="1" file="Source/resources/animation_pp/frame_40.jpg"/>
+          <FILE id="V7f1FF" name="frame_41.jpg" compile="0" resource="1" file="Source/resources/animation_pp/frame_41.jpg"/>
+          <FILE id="rELXCG" name="frame_42.jpg" compile="0" resource="1" file="Source/resources/animation_pp/frame_42.jpg"/>
+          <FILE id="gUhGPp" name="frame_43.jpg" compile="0" resource="1" file="Source/resources/animation_pp/frame_43.jpg"/>
+          <FILE id="AiIBSW" name="frame_44.jpg" compile="0" resource="1" file="Source/resources/animation_pp/frame_44.jpg"/>
+          <FILE id="PpL3HY" name="frame_45.jpg" compile="0" resource="1" file="Source/resources/animation_pp/frame_45.jpg"/>
+          <FILE id="RM57AZ" name="frame_46.jpg" compile="0" resource="1" file="Source/resources/animation_pp/frame_46.jpg"/>
+          <FILE id="Rk2SFp" name="frame_47.jpg" compile="0" resource="1" file="Source/resources/animation_pp/frame_47.jpg"/>
+          <FILE id="lR6T03" name="frame_48.jpg" compile="0" resource="1" file="Source/resources/animation_pp/frame_48.jpg"/>
+          <FILE id="Kzt1ZE" name="frame_49.jpg" compile="0" resource="1" file="Source/resources/animation_pp/frame_49.jpg"/>
+          <FILE id="KIsWsZ" name="frame_50.jpg" compile="0" resource="1" file="Source/resources/animation_pp/frame_50.jpg"/>
+          <FILE id="pw2Em4" name="frame_51.jpg" compile="0" resource="1" file="Source/resources/animation_pp/frame_51.jpg"/>
+          <FILE id="lK5BB2" name="frame_52.jpg" compile="0" resource="1" file="Source/resources/animation_pp/frame_52.jpg"/>
+          <FILE id="WVBfDM" name="frame_53.jpg" compile="0" resource="1" file="Source/resources/animation_pp/frame_53.jpg"/>
+          <FILE id="E7m6k7" name="frame_54.jpg" compile="0" resource="1" file="Source/resources/animation_pp/frame_54.jpg"/>
+          <FILE id="my0lE7" name="frame_55.jpg" compile="0" resource="1" file="Source/resources/animation_pp/frame_55.jpg"/>
+          <FILE id="mrgIrb" name="frame_56.jpg" compile="0" resource="1" file="Source/resources/animation_pp/frame_56.jpg"/>
+          <FILE id="Rd9UWk" name="frame_57.jpg" compile="0" resource="1" file="Source/resources/animation_pp/frame_57.jpg"/>
+          <FILE id="uJioHU" name="frame_58.jpg" compile="0" resource="1" file="Source/resources/animation_pp/frame_58.jpg"/>
+        </GROUP>
         <FILE id="jfQvQ9" name="CompressionValue.h" compile="0" resource="0"
               file="Source/resources/CompressionValue.h"/>
         <FILE id="PVvOqt" name="HorizontalLineSource.h" compile="0" resource="0"
