@@ -27,7 +27,8 @@ juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
     layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"pingpongtime", 1}, "Ping Pong Time", 0.1f, 2000.0f, 500.0f));
     layout.add(std::make_unique<juce::AudioParameterChoice>(juce::ParameterID{"pingpongstyle", 1}, "Ping Pong Style", PINGPONG_STYLE, 0));
     layout.add(std::make_unique<juce::AudioParameterInt>(juce::ParameterID{"switchpingpong", 1}, "switch ping pong", 0, 1, 0));
-
+    layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"offset", 1}, "offset", 0.0f, 1.0f, 1.0f));
+    layout.add(std::make_unique<juce::AudioParameterInt>(juce::ParameterID{"revertpan", 1}, "Reverse Pan", 0.0f, 1.0f, 1.0f));
     // Add other parameters...
     layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"gain", 1}, "Gain", 0.0f, 1.0f, 1.0f));
     layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"feedback", 1}, "FeedBack", 0.0f, 0.99f, 0.5f));
@@ -92,6 +93,8 @@ void DelayAudioProcessor::addAudioListener()
     parameters.addParameterListener("mix", this);
     parameters.addParameterListener("pan", this);
     parameters.addParameterListener("manualPan", this);
+    parameters.addParameterListener("offset", this);
+    parameters.addParameterListener("revertpan", this);
 }
 void DelayAudioProcessor::debugNodes()
 {
@@ -345,44 +348,7 @@ void DelayAudioProcessor::changeProgramName(int index, const juce::String &newNa
 {
 }
 
-float DelayAudioProcessor::computePan(float bpm, float ppqPosition, float ppqMesure, float timeSecond, std::string panType, int timeSigDenominator, int timeSigNumerator)
-{
 
-    // TODO ADD PARAMETER FOR PAN TYPE
-    // TODO ADD PARAMETER FOR PAN TIME
-
-    double beatTime = 60.0f / bpm;
-    double timeMesure = ppqMesure * beatTime;
-    double pan = 0.0f;
-
-    if (panType == "linear")
-    {
-        double delta = (timeSecond - timeMesure) / beatTime;
-        delta = (ppqPosition - ppqMesure) / timeSigNumerator;
-        // Delta should be between 0 and timeSigNumerator
-        // delta = delta/timeSigNumerator;
-        if (delta > 0.5f)
-        {
-            delta = 1.0f - delta;
-        }
-
-        jassert(delta <= 1.0f && delta >= 0.0f);
-
-        pan = delta * 4.0f - 1.0f;
-
-        jassert(pan <= 1.0f && pan >= -1.0f);
-    }
-    else if (panType == "sin")
-    {
-        double delta = std::fmod(((*parameters.getRawParameterValue("delaytime") / 1000.0f)) * 0.5f + timeSecond, (*parameters.getRawParameterValue("delaytime") / 1000.0f)) / (*parameters.getRawParameterValue("delaytime") / 1000.0f);
-    }
-    else if (panType == "sinRandom")
-    {
-        // VERSION SIN RANDOM
-        pan = std::sin(timeSecond * 2.0f * juce::MathConstants<float>::pi);
-    }
-    return pan;
-}
 
 void DelayAudioProcessor::parameterChanged(const juce::String &parameterID, float newValue)
 {
@@ -414,13 +380,23 @@ void DelayAudioProcessor::parameterChanged(const juce::String &parameterID, floa
     }
     if (parameterID == "pingpongtime")
     {
-  updateDelayParameters( );    }
+    _mParametersPan.pingPongTime = *parameters.getRawParameterValue("pingpongtime");  
+    }
+    if(parameterID == "offset"){
+        _mParametersPan.offset = *parameters.getRawParameterValue("offset");
+    }
+
     if (parameterID == "pingpongnotes")
     {
-  updateDelayParameters( );    }
+         std::cout<<"pingpongstyle :  "<< notesValues[newValue].toStdString() <<std::endl;
+         std::cout <<  *parameters.getRawParameterValue("pingpongnotes")<< std::endl;
+    _mParametersPan.pingPongNote =notesValues[newValue].toStdString();
+     }
     if (parameterID == "pingpongstyle")
-    {
-  updateDelayParameters( );    }
+    {           
+        std::cout<<"pingpongstyle :  "<< PINGPONG_STYLE[newValue].toStdString() <<std::endl;
+            _mParametersPan.panType = PINGPONG_STYLE[newValue].toStdString();
+     }
     if (parameterID == "mix")
     {
   updateDelayParameters( );    }
@@ -430,9 +406,11 @@ void DelayAudioProcessor::parameterChanged(const juce::String &parameterID, floa
     if (parameterID == "manualPan")
     {
   updateDelayParameters( );    }
+    if(parameterID == "revertpan"){
+_mParametersPan.revertPan = *parameters.getRawParameterValue("revertpan");
+    }
 
-    // updateGUI();
-    // updateDelayParameters();
+
 }
 
 //==============================================================================
@@ -483,6 +461,41 @@ void DelayAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer, juce::M
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear(i, 0, buffer.getNumSamples());
 
+    pan = 0.0f;
+    if (getPlayHead() != nullptr)
+    {
+        bpm = getPlayHead()->getPosition()->getBpm().orFallback(0.0);
+         _mParametersPan.ppqPosition= getPlayHead()->getPosition()->getPpqPosition().orFallback(0.0);
+         _mParametersPan.ppqMesure = getPlayHead()->getPosition()->getPpqPositionOfLastBarStart().orFallback(0.0);
+        
+         _mParametersPan.timeSecond = getPlayHead()->getPosition()->getTimeInSeconds().orFallback(0.0);
+
+        /**
+         * Error with time signature optional
+         */
+        int timeSigDenominator = 4;
+        int timeSigNumerator = 4;
+        juce::Optional<juce::AudioPlayHead::TimeSignature> timsigFromHost = getPlayHead()->getPosition()->getTimeSignature();
+        if (timsigFromHost)
+        {
+            _mParametersPan.timeSigNumerator = timsigFromHost->numerator;
+              _mParametersPan.timeSigDenominator = timsigFromHost->denominator;
+        }
+
+        std::string panType = "linear";
+            _mParametersPan.bpm = bpm;
+           
+        // Retourne valeur entre -1 et 1, faire gaffe modelisation trajet
+        pan = PanComputing::computePan(_mParametersPan);
+     auto delayProcessor = dynamic_cast<DelayPingPongProcessor *>(delayNode->getProcessor());
+    if (delayProcessor != nullptr)
+    {
+        delayProcessor->setPan(pan);
+        }
+    }
+    // For testing only
+        pan = PanComputing::computePan(_mParametersPan);
+
     audioGraph.processBlock(buffer, midiMessages);
 
     // // Make sure we are processing stereo audio
@@ -498,34 +511,6 @@ void DelayAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer, juce::M
         outputChannelData[1] = buffer.getWritePointer(1);
     }
 
-    pan = 0.0f;
-    if (getPlayHead() != nullptr)
-    {
-        bpm = getPlayHead()->getPosition()->getBpm().orFallback(0.0);
-        float ppqPosition = getPlayHead()->getPosition()->getPpqPosition().orFallback(0.0);
-        float ppqMesure = getPlayHead()->getPosition()->getPpqPositionOfLastBarStart().orFallback(0.0);
-        double timeSecond = getPlayHead()->getPosition()->getTimeInSeconds().orFallback(0.0);
-
-        /**
-         * Error with time signature optional
-         */
-        int timeSigDenominator = 4;
-        int timeSigNumerator = 4;
-        juce::Optional<juce::AudioPlayHead::TimeSignature> timsigFromHost = getPlayHead()->getPosition()->getTimeSignature();
-        if (timsigFromHost)
-        {
-            timeSigNumerator = timsigFromHost->numerator;
-            timeSigDenominator = timsigFromHost->denominator;
-        }
-
-        std::string panType = "linear";
-
-        // Retourne valeur entre -1 et 1, faire gaffe modelisation trajet
-
-        pan = computePan(bpm, ppqPosition, ppqMesure, timeSecond, panType, timeSigDenominator, timeSigNumerator);
-    }
-    // updateGUI();
-    // updateDelayParameters();
     analyserOutput->pushSamples(buffer);
 }
 void DelayAudioProcessor::updateGUI(std::string parameterName)
@@ -553,10 +538,13 @@ void DelayAudioProcessor::updateGUI(std::string parameterName)
         if (switchPingPong == 1)
         {
             changeSliderParameter("pingPongSlider", "pingpongtime");
+            _mParametersPan.inTime = true;
         }
         else
         {
             changeSliderParameter("pingPongSlider", "pingpongnotes");
+                        _mParametersPan.inTime = false;
+
         }
     }
 }

@@ -11,78 +11,76 @@
 #include "resources/HorizontalLineSource.h"
 #include "resources/CompressionValue.h"
 #include "components/FanComponent.h"
+#include "service/PanComputing.h"
 // #include "faustDSP/FaustEffect.h"
- 
 
- const static      juce::StringArray notesValues = { "1/2", "1/4", "1/8", "1/16", "1/32" };
-  const static     juce::StringArray PINGPONG_STYLE = { "Linear", "Sinus", "MadSin" };
+const static juce::StringArray notesValues = {"1/2", "1/4", "1/8", "1/16", "1/32"};
+const static juce::StringArray PINGPONG_STYLE = {"Linear", "Sinus", "MadSin"};
 //==============================================================================
 
-class DelayAudioProcessor  : public foleys::MagicProcessor,  private juce::AsyncUpdater, public juce::AudioProcessorValueTreeState::Listener
-                      /*      #if JucePlugin_Enable_ARA
-                             , public juce::AudioProcessorARAExtension
-                            #endif*/
+class DelayAudioProcessor : public foleys::MagicProcessor, private juce::AsyncUpdater, public juce::AudioProcessorValueTreeState::Listener
+/*      #if JucePlugin_Enable_ARA
+       , public juce::AudioProcessorARAExtension
+      #endif*/
 {
 public:
-    //==============================================================================
-    DelayAudioProcessor() ;
-    void addAudioListener();
-    ~DelayAudioProcessor() override;
+  //==============================================================================
+  DelayAudioProcessor();
+  void addAudioListener();
+  ~DelayAudioProcessor() override;
 
-    //==============================================================================
-    void prepareToPlay (double sampleRate, int samplesPerBlock) override;
-    void releaseResources() override;
+  //==============================================================================
+  void prepareToPlay(double sampleRate, int samplesPerBlock) override;
+  void releaseResources() override;
 
-   #ifndef JucePlugin_PreferredChannelConfigurations
-    bool isBusesLayoutSupported (const BusesLayout& layouts) const override;
-   #endif
-// }
-void initialiseBuilder(foleys::MagicGUIBuilder& builder) override;
-    void processBlock (juce::AudioBuffer<float>&, juce::MidiBuffer&) override;
+#ifndef JucePlugin_PreferredChannelConfigurations
+  bool isBusesLayoutSupported(const BusesLayout &layouts) const override;
+#endif
+  // }
+  void initialiseBuilder(foleys::MagicGUIBuilder &builder) override;
+  void processBlock(juce::AudioBuffer<float> &, juce::MidiBuffer &) override;
 
-    void updateGUI(std::string parameterName);
+  void updateGUI(std::string parameterName);
 
-    //==============================================================================
-    const juce::String getName() const override;
-    void connectNodes ();
-    void debugNodes();
+  //==============================================================================
+  const juce::String getName() const override;
+  void connectNodes();
+  void debugNodes();
 
-    void handleAsyncUpdate() override;
+  void handleAsyncUpdate() override;
 
-    void changeSliderParameter(const juce::String &sliderID, const juce::String &newParameterID);
+  void changeSliderParameter(const juce::String &sliderID, const juce::String &newParameterID);
 
-    bool acceptsMidi() const override;
-    bool producesMidi() const override;
-    bool isMidiEffect() const override;
-    double getTailLengthSeconds() const override;
+  bool acceptsMidi() const override;
+  bool producesMidi() const override;
+  bool isMidiEffect() const override;
+  double getTailLengthSeconds() const override;
 
-    //==============================================================================
-    int getNumPrograms() override;
-    int getCurrentProgram() override;
-    void setCurrentProgram (int index) override;
-    const juce::String getProgramName (int index) override;
-    void changeProgramName (int index, const juce::String& newName) override;
-    float computePan(float bpm, float ppqPosition, float ppqMesure, float timeSecond, std::string panType, int timeSigDenominator, int timeSigNumerator);
-    void updateDelayParameters();
-    //==============================================================================
-    void getStateInformation (juce::MemoryBlock& destData) override;
-    void setStateInformation (const void* data, int sizeInBytes) override;
-    // juce::AudioProcessorEditor* createEditor();
-    //==============================================================================
-  struct DelayParameters
-        {
-            float delayTime = 0.5f;
-            float feedback = 0.5f;
-            float wetLevel = 0.5f;
-            float dryLevel = 0.5f;
-        } delayParameters;
+  //==============================================================================
+  int getNumPrograms() override;
+  int getCurrentProgram() override;
+  void setCurrentProgram(int index) override;
+  const juce::String getProgramName(int index) override;
+  void changeProgramName(int index, const juce::String &newName) override;
+  float computePan(float bpm, float ppqPosition, float ppqMesure, float timeSecond, std::string panType, int timeSigDenominator, int timeSigNumerator);
+  void updateDelayParameters();
+  //==============================================================================
+  void getStateInformation(juce::MemoryBlock &destData) override;
+  void setStateInformation(const void *data, int sizeInBytes) override;
+  // juce::AudioProcessorEditor* createEditor();
+  //==============================================================================
 
+  juce::AudioProcessorValueTreeState parameters;
+  float getInputVolume() const { return inputVolume; }
 
-    juce::AudioProcessorValueTreeState parameters;
-    float getInputVolume() const { return inputVolume; }
+  void parameterChanged(const juce::String &parameterID, float newValue) override;
 
-    void parameterChanged(const juce::String& parameterID, float newValue) override;
 private:
+private:
+
+
+  PanComputing::ParametersPan _mParametersPan;
+
   juce::AudioProcessorGraph audioGraph;
 
   // std::unique_ptr<juce::AudioProcessor> gainProcessor;
@@ -90,18 +88,18 @@ private:
 
   juce::AudioProcessorGraph::Node::Ptr delayNode;
   juce::AudioProcessorGraph::Node::Ptr gainNode;
-    juce::AudioProcessorGraph::Node::Ptr mixerNode;
+  juce::AudioProcessorGraph::Node::Ptr mixerNode;
 
-      int switchPingPong = 0;
-        int switchDelay = 0;
-        float inputVolume = 0.0f;
-        foleys::MagicPlotSource* analyser = nullptr;
-        foleys::MagicPlotSource* analyserOutput = nullptr;
-        float pan = 0.0f;
-            std::atomic<double> widthComponent;
-            float bpm =100.0f;
-    juce::String pendingSliderID;
-    juce::String pendingParameterName;
-    //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DelayAudioProcessor)
+  int switchPingPong = 0;
+  int switchDelay = 0;
+  float inputVolume = 0.0f;
+  foleys::MagicPlotSource *analyser = nullptr;
+  foleys::MagicPlotSource *analyserOutput = nullptr;
+  float pan = 0.0f;
+  std::atomic<double> widthComponent;
+  float bpm = 100.0f;
+  juce::String pendingSliderID;
+  juce::String pendingParameterName;
+  //==============================================================================
+  JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(DelayAudioProcessor)
 };
