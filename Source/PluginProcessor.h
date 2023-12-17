@@ -40,7 +40,7 @@ public:
 void initialiseBuilder(foleys::MagicGUIBuilder& builder) override;
     void processBlock (juce::AudioBuffer<float>&, juce::MidiBuffer&) override;
 
-    void updateGUI();
+    void updateGUI(std::string parameterName);
 
     //==============================================================================
     const juce::String getName() const override;
@@ -93,8 +93,8 @@ private:
     juce::AudioProcessorGraph::Node::Ptr mixerNode;
 
       int switchPingPong = 0;
-        float inputVolume = 0.0f;
         int switchDelay = 0;
+        float inputVolume = 0.0f;
         foleys::MagicPlotSource* analyser = nullptr;
         foleys::MagicPlotSource* analyserOutput = nullptr;
         float pan = 0.0f;

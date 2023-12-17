@@ -69,31 +69,32 @@ DelayAudioProcessor::DelayAudioProcessor()
     analyserOutput = magicState.createAndAddObject<foleys::MagicAnalyser>("output");
     magicState.setPlayheadUpdateFrequency(30);
     audioGraph.clear();
-      audioGraph.setPlayConfigDetails(getTotalNumInputChannels(),
-                                getTotalNumOutputChannels(),
-                                   getSampleRate(),
-                                   getBlockSize());
-     DelayAudioProcessor::connectNodes();
-     addAudioListener();
-   // DelayAudioProcessor::debugNodes();
+    audioGraph.setPlayConfigDetails(getTotalNumInputChannels(),
+                                    getTotalNumOutputChannels(),
+                                    getSampleRate(),
+                                    getBlockSize());
+    DelayAudioProcessor::connectNodes();
+    addAudioListener();
+    // DelayAudioProcessor::debugNodes();
 }
-void  DelayAudioProcessor::addAudioListener(){
-        parameters.addParameterListener("width", this);
-        parameters.addParameterListener("gain", this);
-        parameters.addParameterListener("feedback", this);
-        parameters.addParameterListener("noteslength", this);
-        parameters.addParameterListener("delaytime", this);
-        parameters.addParameterListener("switchDelay", this);
-        parameters.addParameterListener("switchpingpong", this);
-        parameters.addParameterListener("pingpongtime", this);
-        parameters.addParameterListener("pingpongnotes", this);
-        parameters.addParameterListener("pingpongstyle", this);
-        parameters.addParameterListener("mix", this);
-        parameters.addParameterListener("pan", this);
-        parameters.addParameterListener("manualPan", this);
-
+void DelayAudioProcessor::addAudioListener()
+{
+    parameters.addParameterListener("width", this);
+    parameters.addParameterListener("gain", this);
+    parameters.addParameterListener("feedback", this);
+    parameters.addParameterListener("noteslength", this);
+    parameters.addParameterListener("delaytime", this);
+    parameters.addParameterListener("switchDelay", this);
+    parameters.addParameterListener("switchpingpong", this);
+    parameters.addParameterListener("pingpongtime", this);
+    parameters.addParameterListener("pingpongnotes", this);
+    parameters.addParameterListener("pingpongstyle", this);
+    parameters.addParameterListener("mix", this);
+    parameters.addParameterListener("pan", this);
+    parameters.addParameterListener("manualPan", this);
 }
-void DelayAudioProcessor::debugNodes(){
+void DelayAudioProcessor::debugNodes()
+{
     std::unique_ptr<juce::AudioProcessor> mixerProcessor = std::make_unique<DryWetMixer>();
 
     mixerNode = audioGraph.addNode(std::move(mixerProcessor));
@@ -119,7 +120,7 @@ void DelayAudioProcessor::debugNodes(){
 
     // Add the processor to the graph and get the node
     auto outputNode = audioGraph.addNode(std::move(outputProcessor));
-        // Connect the input to the first node
+    // Connect the input to the first node
     if (inputNode != nullptr && outputNode != nullptr)
     {
         for (int channel = 0; channel < getTotalNumInputChannels(); ++channel)
@@ -161,7 +162,6 @@ void DelayAudioProcessor::connectNodes()
     // Add the processor to the graph and get the node
     auto outputNode = audioGraph.addNode(std::move(outputProcessor));
 
-    
     // Connect the input to the first node
     if (inputNode != nullptr && gainNode != nullptr)
     {
@@ -186,23 +186,6 @@ void DelayAudioProcessor::connectNodes()
         }
     }
 
-    // // Connect the last node to the output
-    // if (delayNode != nullptr && outputNode != nullptr)
-    // {
-    //     for (int channel = 0; channel < getTotalNumOutputChannels(); ++channel)
-    //     {
-    //         juce::AudioProcessorGraph::Connection connection;
-    //         connection.source = {delayNode->nodeID, channel};
-    //         connection.destination = {outputNode->nodeID, channel};
-
-    //         audioGraph.addConnection(connection);
-    //     }
-    // }
-
-    /*
-MAKE A MIXER AROUND ANOTHER NODE
-*/
-    // Connect the input to the mixer (dry signal)
     if (inputNode != nullptr && mixerNode != nullptr)
     {
         for (int channel = 0; channel < 2; ++channel)
@@ -257,35 +240,33 @@ juce::ValueTree findChildWithProperty(const juce::ValueTree &tree, const juce::I
 
     return juce::ValueTree();
 }
-  void DelayAudioProcessor::changeSliderParameter(const juce::String &sliderID, const juce::String &newParameterName)
+void DelayAudioProcessor::changeSliderParameter(const juce::String &sliderID, const juce::String &newParameterName)
+{
+    // Store the new parameter name and slider ID
+    pendingSliderID = sliderID;
+    pendingParameterName = newParameterName;
+
+    std::cout << "changeSliderParameter: " << sliderID << " -> " << newParameterName << std::endl;
+    std::cout << "  pendingSliderID: " << pendingSliderID << std::endl;
+    // Trigger an asynchronous update
+    triggerAsyncUpdate();
+}
+
+void DelayAudioProcessor::handleAsyncUpdate()
+{
+    // Change the slider parameter on the message thread
+    auto slider = findChildWithProperty(magicState.getGuiTree(), "id", pendingSliderID);
+    if (slider.isValid())
     {
-        // Store the new parameter name and slider ID
-        pendingSliderID = sliderID;
-        pendingParameterName = newParameterName;
-
-        std::cout << "changeSliderParameter: " << sliderID << " -> " << newParameterName << std::endl;
-        std::cout << "  pendingSliderID: " << pendingSliderID << std::endl;
-        // Trigger an asynchronous update
-        triggerAsyncUpdate();
+        std::cout << "  slider found: " << slider.getType().toString() << std::endl;
+        juce::var varParameterName = juce::var(pendingParameterName);
+        slider.setProperty("parameter", varParameterName, nullptr);
     }
-
-
- void DelayAudioProcessor::handleAsyncUpdate() 
+    else
     {
-        // Change the slider parameter on the message thread
-        auto slider = findChildWithProperty(magicState.getGuiTree(), "id", pendingSliderID);
-        if (slider.isValid())
-        {
-            std::cout << "  slider found: " << slider.getType().toString() << std::endl;
-            juce::var varParameterName = juce::var(pendingParameterName);
-            slider.setProperty("parameter", varParameterName, nullptr);
-        }
-        else {
-            std::cout << "  slider not found: " << pendingSliderID << std::endl;
-        }
+        std::cout << "  slider not found: " << pendingSliderID << std::endl;
     }
-
-
+}
 
 DelayAudioProcessor::~DelayAudioProcessor()
 {
@@ -403,16 +384,56 @@ float DelayAudioProcessor::computePan(float bpm, float ppqPosition, float ppqMes
     return pan;
 }
 
-           void DelayAudioProcessor::parameterChanged(const juce::String& parameterID, float newValue) 
+void DelayAudioProcessor::parameterChanged(const juce::String &parameterID, float newValue)
+{
+    // This method is called when a parameter changes
+    if (parameterID == "width")
     {
-        // This method is called when a parameter changes
-
-        
-            updateGUI();
-            updateDelayParameters();
-        
-
+  updateDelayParameters( );    }
+    if (parameterID == "gain")
+    {
+  updateDelayParameters( );    }
+    if (parameterID == "feedback")
+    {
+  updateDelayParameters( );    }
+    if (parameterID == "noteslength")
+    {
+  updateDelayParameters( );    }
+    if (parameterID == "delaytime")
+    {
+        updateDelayParameters( );
     }
+    if (parameterID == "switchDelay")
+    {
+
+        updateGUI("delayTime");
+    }
+    if (parameterID == "switchpingpong")
+    {
+        updateGUI("pingPongTime");
+    }
+    if (parameterID == "pingpongtime")
+    {
+  updateDelayParameters( );    }
+    if (parameterID == "pingpongnotes")
+    {
+  updateDelayParameters( );    }
+    if (parameterID == "pingpongstyle")
+    {
+  updateDelayParameters( );    }
+    if (parameterID == "mix")
+    {
+  updateDelayParameters( );    }
+    if (parameterID == "pan")
+    {
+  updateDelayParameters( );    }
+    if (parameterID == "manualPan")
+    {
+  updateDelayParameters( );    }
+
+    // updateGUI();
+    // updateDelayParameters();
+}
 
 //==============================================================================
 void DelayAudioProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
@@ -462,7 +483,7 @@ void DelayAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer, juce::M
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear(i, 0, buffer.getNumSamples());
 
- audioGraph.processBlock(buffer, midiMessages);
+    audioGraph.processBlock(buffer, midiMessages);
 
     // // Make sure we are processing stereo audio
     if (totalNumInputChannels == 2 && totalNumOutputChannels == 2)
@@ -507,29 +528,36 @@ void DelayAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer, juce::M
     // updateDelayParameters();
     analyserOutput->pushSamples(buffer);
 }
-void DelayAudioProcessor::updateGUI()
+void DelayAudioProcessor::updateGUI(std::string parameterName)
 {
-    
-    switchDelay = *parameters.getRawParameterValue("switchDelay");
 
-    if (switchDelay == 1)
+    if (parameterName == "delayTime")
     {
-        std::cout<<"switch1 " <<std::endl;
-        changeSliderParameter("delaySlider", "delaytime");
-    }
-    else
-    {
-        changeSliderParameter("delaySlider", "noteslength");
-    }
 
-    switchPingPong = *parameters.getRawParameterValue("switchpingpong");
-    if (switchPingPong == 1)
-    {
-        changeSliderParameter("pingPongSlider", "pingpongtime");
+        switchDelay = *parameters.getRawParameterValue("switchDelay");
+
+        if (switchDelay == 1)
+        {
+            std::cout << "switch1 " << std::endl;
+            changeSliderParameter("delaySlider", "delaytime");
+        }
+        else
+        {
+            changeSliderParameter("delaySlider", "noteslength");
+        }
     }
-    else
+    if (parameterName == "pingPongTime")
     {
-        changeSliderParameter("pingPongSlider", "pingpongnotes");
+
+        switchPingPong = *parameters.getRawParameterValue("switchpingpong");
+        if (switchPingPong == 1)
+        {
+            changeSliderParameter("pingPongSlider", "pingpongtime");
+        }
+        else
+        {
+            changeSliderParameter("pingPongSlider", "pingpongnotes");
+        }
     }
 }
 void DelayAudioProcessor::updateDelayParameters()
@@ -539,7 +567,6 @@ void DelayAudioProcessor::updateDelayParameters()
     float width = *parameters.getRawParameterValue("width");
     auto rootGui = magicState.getGuiTree();
 
-   
     std::string notesLength = "1/4";
     auto param = dynamic_cast<juce::AudioParameterChoice *>(parameters.getParameter("noteslength"));
     if (param != nullptr)
