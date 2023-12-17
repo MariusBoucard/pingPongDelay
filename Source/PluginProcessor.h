@@ -18,7 +18,7 @@
   const static     juce::StringArray PINGPONG_STYLE = { "Linear", "Sinus", "MadSin" };
 //==============================================================================
 
-class DelayAudioProcessor  : public foleys::MagicProcessor,  private juce::AsyncUpdater
+class DelayAudioProcessor  : public foleys::MagicProcessor,  private juce::AsyncUpdater, public juce::AudioProcessorValueTreeState::Listener
                       /*      #if JucePlugin_Enable_ARA
                              , public juce::AudioProcessorARAExtension
                             #endif*/
@@ -26,6 +26,7 @@ class DelayAudioProcessor  : public foleys::MagicProcessor,  private juce::Async
 public:
     //==============================================================================
     DelayAudioProcessor() ;
+    void addAudioListener();
     ~DelayAudioProcessor() override;
 
     //==============================================================================
@@ -62,7 +63,7 @@ void initialiseBuilder(foleys::MagicGUIBuilder& builder) override;
     const juce::String getProgramName (int index) override;
     void changeProgramName (int index, const juce::String& newName) override;
     float computePan(float bpm, float ppqPosition, float ppqMesure, float timeSecond, std::string panType, int timeSigDenominator, int timeSigNumerator);
-    void updateDelayParameters(float bpm);
+    void updateDelayParameters();
     //==============================================================================
     void getStateInformation (juce::MemoryBlock& destData) override;
     void setStateInformation (const void* data, int sizeInBytes) override;
@@ -75,11 +76,12 @@ void initialiseBuilder(foleys::MagicGUIBuilder& builder) override;
             float wetLevel = 0.5f;
             float dryLevel = 0.5f;
         } delayParameters;
-       
+
+
     juce::AudioProcessorValueTreeState parameters;
     float getInputVolume() const { return inputVolume; }
 
-    void parameterChanged(const juce::String& parameterID, float newValue);
+    void parameterChanged(const juce::String& parameterID, float newValue) override;
 private:
   juce::AudioProcessorGraph audioGraph;
 
@@ -89,7 +91,6 @@ private:
   juce::AudioProcessorGraph::Node::Ptr delayNode;
   juce::AudioProcessorGraph::Node::Ptr gainNode;
     juce::AudioProcessorGraph::Node::Ptr mixerNode;
-    double bpm = 100.0f;
 
       int switchPingPong = 0;
         float inputVolume = 0.0f;
@@ -98,7 +99,7 @@ private:
         foleys::MagicPlotSource* analyserOutput = nullptr;
         float pan = 0.0f;
             std::atomic<double> widthComponent;
-            
+            float bpm =100.0f;
     juce::String pendingSliderID;
     juce::String pendingParameterName;
     //==============================================================================

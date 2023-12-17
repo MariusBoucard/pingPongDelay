@@ -74,9 +74,25 @@ DelayAudioProcessor::DelayAudioProcessor()
                                    getSampleRate(),
                                    getBlockSize());
      DelayAudioProcessor::connectNodes();
+     addAudioListener();
    // DelayAudioProcessor::debugNodes();
 }
+void  DelayAudioProcessor::addAudioListener(){
+        parameters.addParameterListener("width", this);
+        parameters.addParameterListener("gain", this);
+        parameters.addParameterListener("feedback", this);
+        parameters.addParameterListener("noteslength", this);
+        parameters.addParameterListener("delaytime", this);
+        parameters.addParameterListener("switchDelay", this);
+        parameters.addParameterListener("switchpingpong", this);
+        parameters.addParameterListener("pingpongtime", this);
+        parameters.addParameterListener("pingpongnotes", this);
+        parameters.addParameterListener("pingpongstyle", this);
+        parameters.addParameterListener("mix", this);
+        parameters.addParameterListener("pan", this);
+        parameters.addParameterListener("manualPan", this);
 
+}
 void DelayAudioProcessor::debugNodes(){
     std::unique_ptr<juce::AudioProcessor> mixerProcessor = std::make_unique<DryWetMixer>();
 
@@ -247,6 +263,8 @@ juce::ValueTree findChildWithProperty(const juce::ValueTree &tree, const juce::I
         pendingSliderID = sliderID;
         pendingParameterName = newParameterName;
 
+        std::cout << "changeSliderParameter: " << sliderID << " -> " << newParameterName << std::endl;
+        std::cout << "  pendingSliderID: " << pendingSliderID << std::endl;
         // Trigger an asynchronous update
         triggerAsyncUpdate();
     }
@@ -258,8 +276,12 @@ juce::ValueTree findChildWithProperty(const juce::ValueTree &tree, const juce::I
         auto slider = findChildWithProperty(magicState.getGuiTree(), "id", pendingSliderID);
         if (slider.isValid())
         {
+            std::cout << "  slider found: " << slider.getType().toString() << std::endl;
             juce::var varParameterName = juce::var(pendingParameterName);
             slider.setProperty("parameter", varParameterName, nullptr);
+        }
+        else {
+            std::cout << "  slider not found: " << pendingSliderID << std::endl;
         }
     }
 
@@ -381,10 +403,16 @@ float DelayAudioProcessor::computePan(float bpm, float ppqPosition, float ppqMes
     return pan;
 }
 
-void DelayAudioProcessor::parameterChanged(const juce::String &parameterID, float newValue)
-{
-    // Could be usefull in the futur, but not now
-}
+           void DelayAudioProcessor::parameterChanged(const juce::String& parameterID, float newValue) 
+    {
+        // This method is called when a parameter changes
+
+        
+            updateGUI();
+            updateDelayParameters();
+        
+
+    }
 
 //==============================================================================
 void DelayAudioProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
@@ -475,8 +503,8 @@ void DelayAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer, juce::M
 
         pan = computePan(bpm, ppqPosition, ppqMesure, timeSecond, panType, timeSigDenominator, timeSigNumerator);
     }
-    updateGUI();
-    updateDelayParameters(bpm);
+    // updateGUI();
+    // updateDelayParameters();
     analyserOutput->pushSamples(buffer);
 }
 void DelayAudioProcessor::updateGUI()
@@ -486,6 +514,7 @@ void DelayAudioProcessor::updateGUI()
 
     if (switchDelay == 1)
     {
+        std::cout<<"switch1 " <<std::endl;
         changeSliderParameter("delaySlider", "delaytime");
     }
     else
@@ -503,38 +532,19 @@ void DelayAudioProcessor::updateGUI()
         changeSliderParameter("pingPongSlider", "pingpongnotes");
     }
 }
-void DelayAudioProcessor::updateDelayParameters(float bpm)
+void DelayAudioProcessor::updateDelayParameters()
 {
     float feedback = *parameters.getRawParameterValue("feedback");
     float gain = *parameters.getRawParameterValue("gain");
     float width = *parameters.getRawParameterValue("width");
     auto rootGui = magicState.getGuiTree();
 
-    //================== Not Working Code =================
-    // auto widthComponent = magicState.getGuiTree().getChildWithName("root").getChildWithName("container").getChildWithName("leftColumn").getChildWithName("widthComponent");
-
-    // if (widthComponent.isValid())
-    // {
-    //     // FanItem* fan = dynamic_cast<FanItem*>(widthComponent);
-    //     // width = fan->getFactor();
-    //     // width =  widthComponent.getPropertyAsValue("factor",nullptr).getValue();
-    //     *parameters.getRawParameterValue("width") = 0.3f;
-    //     // *parameters.getRawParameterValue("width") = width ;
-    // }
-    // else
-    // {
-    //     // width = *parameters.getRawParameterValue("width") ;
-    //     width = 0.5f;
-    //     *parameters.getRawParameterValue("width") = 0.5f;
-    // }
-
-    //================== Not Working Code =================
+   
     std::string notesLength = "1/4";
     auto param = dynamic_cast<juce::AudioParameterChoice *>(parameters.getParameter("noteslength"));
     if (param != nullptr)
     {
         int selectedIndex = param->getIndex();
-        // Do something with selectedIndex...
         notesLength = param->choices[selectedIndex].toStdString();
     }
 
