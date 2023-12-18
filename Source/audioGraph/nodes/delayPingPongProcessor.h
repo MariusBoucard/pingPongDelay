@@ -102,7 +102,9 @@ public:
     {
         bpm = 100.0f;
         float quarterNote = (60.0f / bpm) * 1000;
-
+        if(noteTyp == "1/1"){
+            delay = quarterNote * 4;
+        }
         if (noteTyp == "1/2")
         {
             delay = quarterNote * 2;

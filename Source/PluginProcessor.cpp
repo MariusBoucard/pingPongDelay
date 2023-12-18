@@ -348,26 +348,28 @@ void DelayAudioProcessor::changeProgramName(int index, const juce::String &newNa
 {
 }
 
-
-
 void DelayAudioProcessor::parameterChanged(const juce::String &parameterID, float newValue)
 {
     // This method is called when a parameter changes
     if (parameterID == "width")
     {
-  updateDelayParameters( );    }
+        updateDelayParameters();
+    }
     if (parameterID == "gain")
     {
-  updateDelayParameters( );    }
+        updateDelayParameters();
+    }
     if (parameterID == "feedback")
     {
-  updateDelayParameters( );    }
+        updateDelayParameters();
+    }
     if (parameterID == "noteslength")
     {
-  updateDelayParameters( );    }
+        updateDelayParameters();
+    }
     if (parameterID == "delaytime")
     {
-        updateDelayParameters( );
+        updateDelayParameters();
     }
     if (parameterID == "switchDelay")
     {
@@ -380,37 +382,38 @@ void DelayAudioProcessor::parameterChanged(const juce::String &parameterID, floa
     }
     if (parameterID == "pingpongtime")
     {
-    _mParametersPan.pingPongTime = *parameters.getRawParameterValue("pingpongtime");  
+        _mParametersPan.pingPongTime = *parameters.getRawParameterValue("pingpongtime");
     }
-    if(parameterID == "offset"){
+    if (parameterID == "offset")
+    {
         _mParametersPan.offset = *parameters.getRawParameterValue("offset");
     }
 
     if (parameterID == "pingpongnotes")
     {
-         std::cout<<"pingpongstyle :  "<< notesValues[newValue].toStdString() <<std::endl;
-         std::cout <<  *parameters.getRawParameterValue("pingpongnotes")<< std::endl;
-    _mParametersPan.pingPongNote =notesValues[newValue].toStdString();
-     }
+        _mParametersPan.pingPongNote = notesValues[newValue].toStdString();
+    }
     if (parameterID == "pingpongstyle")
-    {           
-        std::cout<<"pingpongstyle :  "<< PINGPONG_STYLE[newValue].toStdString() <<std::endl;
-            _mParametersPan.panType = PINGPONG_STYLE[newValue].toStdString();
-     }
+    {
+        std::cout << "pingpongstyle :  " << PINGPONG_STYLE[newValue].toStdString() << std::endl;
+        _mParametersPan.panType = PINGPONG_STYLE[newValue].toStdString();
+    }
     if (parameterID == "mix")
     {
-  updateDelayParameters( );    }
+        updateDelayParameters();
+    }
     if (parameterID == "pan")
     {
-  updateDelayParameters( );    }
+        updateDelayParameters();
+    }
     if (parameterID == "manualPan")
     {
-  updateDelayParameters( );    }
-    if(parameterID == "revertpan"){
-_mParametersPan.revertPan = *parameters.getRawParameterValue("revertpan");
+        updateDelayParameters();
     }
-
-
+    if (parameterID == "revertpan")
+    {
+        _mParametersPan.revertPan = *parameters.getRawParameterValue("revertpan");
+    }
 }
 
 //==============================================================================
@@ -428,6 +431,41 @@ void DelayAudioProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
 void DelayAudioProcessor::releaseResources()
 {
     audioGraph.releaseResources();
+}
+
+void DelayAudioProcessor::computePanFromParameters()
+{
+    if (playHead != nullptr)
+    {
+        bpm = playHead->getPosition()->getBpm().orFallback(0.0);
+        _mParametersPan.ppqPosition = playHead->getPosition()->getPpqPosition().orFallback(0.0);
+        _mParametersPan.ppqMesure = playHead->getPosition()->getPpqPositionOfLastBarStart().orFallback(0.0);
+
+        _mParametersPan.timeSecond = playHead->getPosition()->getTimeInSeconds().orFallback(0.0);
+
+        /**
+         * Error with time signature optional
+         */
+        int timeSigDenominator = 4;
+        int timeSigNumerator = 4;
+        juce::Optional<juce::AudioPlayHead::TimeSignature> timsigFromHost = playHead->getPosition()->getTimeSignature();
+        if (timsigFromHost)
+        {
+            _mParametersPan.timeSigNumerator = timsigFromHost->numerator;
+            _mParametersPan.timeSigDenominator = timsigFromHost->denominator;
+        }
+
+        std::string panType = "linear";
+        _mParametersPan.bpm = bpm;
+
+        // Retourne valeur entre -1 et 1, faire gaffe modelisation trajet
+        pan = panComputing.computePan(_mParametersPan);
+        auto delayProcessor = dynamic_cast<DelayPingPongProcessor *>(delayNode->getProcessor());
+        if (delayProcessor != nullptr)
+        {
+            delayProcessor->setPan(pan);
+        }
+    }
 }
 
 #ifndef JucePlugin_PreferredChannelConfigurations
@@ -461,40 +499,13 @@ void DelayAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer, juce::M
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear(i, 0, buffer.getNumSamples());
 
-    pan = 0.0f;
-    if (getPlayHead() != nullptr)
+    if (manualPan == 0)
     {
-        bpm = getPlayHead()->getPosition()->getBpm().orFallback(0.0);
-         _mParametersPan.ppqPosition= getPlayHead()->getPosition()->getPpqPosition().orFallback(0.0);
-         _mParametersPan.ppqMesure = getPlayHead()->getPosition()->getPpqPositionOfLastBarStart().orFallback(0.0);
-        
-         _mParametersPan.timeSecond = getPlayHead()->getPosition()->getTimeInSeconds().orFallback(0.0);
-
-        /**
-         * Error with time signature optional
-         */
-        int timeSigDenominator = 4;
-        int timeSigNumerator = 4;
-        juce::Optional<juce::AudioPlayHead::TimeSignature> timsigFromHost = getPlayHead()->getPosition()->getTimeSignature();
-        if (timsigFromHost)
-        {
-            _mParametersPan.timeSigNumerator = timsigFromHost->numerator;
-              _mParametersPan.timeSigDenominator = timsigFromHost->denominator;
-        }
-
-        std::string panType = "linear";
-            _mParametersPan.bpm = bpm;
-           
-        // Retourne valeur entre -1 et 1, faire gaffe modelisation trajet
-        pan = PanComputing::computePan(_mParametersPan);
-     auto delayProcessor = dynamic_cast<DelayPingPongProcessor *>(delayNode->getProcessor());
-    if (delayProcessor != nullptr)
-    {
-        delayProcessor->setPan(pan);
-        }
+        playHead = getPlayHead();
+        computePanFromParameters();
     }
     // For testing only
-        pan = PanComputing::computePan(_mParametersPan);
+    //  pan = PanComputing::computePan(_mParametersPan);
 
     audioGraph.processBlock(buffer, midiMessages);
 
@@ -523,7 +534,6 @@ void DelayAudioProcessor::updateGUI(std::string parameterName)
 
         if (switchDelay == 1)
         {
-            std::cout << "switch1 " << std::endl;
             changeSliderParameter("delaySlider", "delaytime");
         }
         else
@@ -543,8 +553,7 @@ void DelayAudioProcessor::updateGUI(std::string parameterName)
         else
         {
             changeSliderParameter("pingPongSlider", "pingpongnotes");
-                        _mParametersPan.inTime = false;
-
+            _mParametersPan.inTime = false;
         }
     }
 }
@@ -579,6 +588,8 @@ void DelayAudioProcessor::updateDelayParameters()
         }
         else
         {
+            
+            panComputing.setModuloMesure(notesLength);
             delayProcessor->setNotesLength(notesLength, bpm);
         }
 
@@ -586,7 +597,7 @@ void DelayAudioProcessor::updateDelayParameters()
         delayProcessor->setWidth(width);
     }
 
-    int manualPan = *parameters.getRawParameterValue("manualPan");
+    manualPan = *parameters.getRawParameterValue("manualPan");
     if (manualPan == 1)
     {
         pan = *parameters.getRawParameterValue("pan");
@@ -602,25 +613,20 @@ void DelayAudioProcessor::updateDelayParameters()
 //==============================================================================
 void DelayAudioProcessor::getStateInformation(juce::MemoryBlock &destData)
 {
-    // Create an XML element that represents the plugin's current state
     auto state = parameters.copyState();
     std::unique_ptr<juce::XmlElement> xml(state.createXml());
 
-    // Use this helper function to stuff it into the binary blob and return it
     copyXmlToBinary(*xml, destData);
 }
 
 void DelayAudioProcessor::setStateInformation(const void *data, int sizeInBytes)
 {
-    // // This getXmlFromBinary helper function retrieves our XML from the binary blob
     std::unique_ptr<juce::XmlElement> xmlState(getXmlFromBinary(data, sizeInBytes));
 
     if (xmlState.get() != nullptr)
     {
-        // Make sure that it's actually our type of XML object
         if (xmlState->hasTagName(parameters.state.getType()))
         {
-            // Now reload our plugin's state from the XML object
             parameters.replaceState(juce::ValueTree::fromXml(*xmlState));
         }
     }

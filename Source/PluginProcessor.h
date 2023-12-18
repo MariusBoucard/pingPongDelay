@@ -14,7 +14,7 @@
 #include "service/PanComputing.h"
 // #include "faustDSP/FaustEffect.h"
 
-const static juce::StringArray notesValues = {"1/2", "1/4", "1/8", "1/16", "1/32"};
+const static juce::StringArray notesValues = {"1/1","1/2", "1/4", "1/8", "1/16", "1/32"};
 const static juce::StringArray PINGPONG_STYLE = {"Linear", "Sinus", "MadSin"};
 //==============================================================================
 
@@ -32,6 +32,8 @@ public:
   //==============================================================================
   void prepareToPlay(double sampleRate, int samplesPerBlock) override;
   void releaseResources() override;
+
+  void computePanFromParameters();
 
 #ifndef JucePlugin_PreferredChannelConfigurations
   bool isBusesLayoutSupported(const BusesLayout &layouts) const override;
@@ -62,12 +64,10 @@ public:
   void setCurrentProgram(int index) override;
   const juce::String getProgramName(int index) override;
   void changeProgramName(int index, const juce::String &newName) override;
-  float computePan(float bpm, float ppqPosition, float ppqMesure, float timeSecond, std::string panType, int timeSigDenominator, int timeSigNumerator);
   void updateDelayParameters();
   //==============================================================================
   void getStateInformation(juce::MemoryBlock &destData) override;
   void setStateInformation(const void *data, int sizeInBytes) override;
-  // juce::AudioProcessorEditor* createEditor();
   //==============================================================================
 
   juce::AudioProcessorValueTreeState parameters;
@@ -83,9 +83,6 @@ private:
 
   juce::AudioProcessorGraph audioGraph;
 
-  // std::unique_ptr<juce::AudioProcessor> gainProcessor;
-  //   std::unique_ptr<juce::AudioProcessor> delayProcessor;
-
   juce::AudioProcessorGraph::Node::Ptr delayNode;
   juce::AudioProcessorGraph::Node::Ptr gainNode;
   juce::AudioProcessorGraph::Node::Ptr mixerNode;
@@ -96,10 +93,15 @@ private:
   foleys::MagicPlotSource *analyser = nullptr;
   foleys::MagicPlotSource *analyserOutput = nullptr;
   float pan = 0.0f;
+  int manualPan = 0;
   std::atomic<double> widthComponent;
   float bpm = 100.0f;
   juce::String pendingSliderID;
   juce::String pendingParameterName;
+
+  PanComputing panComputing;
+
+  juce::AudioPlayHead* playHead = nullptr;
   //==============================================================================
   JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(DelayAudioProcessor)
 };
