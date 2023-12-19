@@ -2,8 +2,8 @@
 
 //
 // Some nice example drawing
-class PingPongTv   : public juce::Component,
-                    private juce::Timer
+class PingPongTv   : public juce::Component
+                    // private juce::Timer
 {
 public:
     enum ColourIDs
@@ -54,7 +54,7 @@ public:
         setColour (drawColourId, juce::Colours::green);
         setColour (fillColourId, juce::Colours::green.withAlpha (0.5f));
 
-        startTimerHz (30);
+        // startTimerHz (30);
     }
 
 
@@ -62,7 +62,7 @@ public:
     {
 
         
-    g.fillAll (findColour (backgroundColourId));
+    // g.fillAll (findColour (backgroundColourId));
       refereePosition.x = getLocalBounds().getX()+getWidth()/2 - getWidth()/20;
         refereePosition.y =  getLocalBounds().getY()    + getHeight()/4;
         refereePosition.width = getWidth()/10;
@@ -85,7 +85,24 @@ rightPlayerPosition.x = getLocalBounds().getX()+getWidth()*7/8 - getWidth()/10;
         rightPlayerPosition.width = getWidth()/10;
         rightPlayerPosition.height = getHeight()/1.3;
         // draw player 2
-        g.drawImage(rightPlayer, rightPlayerPosition.x, rightPlayerPosition.y, rightPlayerPosition.width, rightPlayerPosition.height, 0, 0, rightPlayer.getWidth(), rightPlayer.getHeight());
+            g.drawImage(rightPlayer, rightPlayerPosition.x, rightPlayerPosition.y, rightPlayerPosition.width, rightPlayerPosition.height, 0, 0, rightPlayer.getWidth(), rightPlayer.getHeight());
+           
+             // Convert the values to strings
+            juce::String panStr = "Pan: " + juce::String(pan);
+            juce::String widthStr = "Width: " + juce::String(width);
+            juce::String manualPanStr = "Manual Pan: " + (manualPan ? juce::String("True") : juce::String("False"));
+
+            // Calculate the position for the text
+            int textHeight = 20;  // Adjust as needed
+            int textY = getHeight() - textHeight;
+
+            // Draw the text
+    //         g.setColour(juce::Colours::white);  // Set the text color
+    //         g.drawText(panStr, 0, textY, getWidth(), textHeight, juce::Justification::left);
+    // g.drawText(widthStr, 0, textY - textHeight, getWidth(), textHeight, juce::Justification::left);
+    // g.drawText(manualPanStr, 0, textY - 2 * textHeight, getWidth(), textHeight, juce::Justification::left);
+   
+   
     }
 
 
@@ -158,11 +175,11 @@ struct imagePosition {
 
 
 
-    void timerCallback() override
-    {
-        repaint();
+    // void timerCallback() override
+    // {
+    //     // repaint();
 
-    }
+    // }
      juce::Image ball;
      juce::Image leftPlayer;
         juce::Image rightPlayer;
@@ -187,7 +204,7 @@ struct imagePosition {
 };
 
 // This class is creating and configuring your custom component
-class PingPongTvItem : public foleys::GuiItem, juce::Timer
+class PingPongTvItem : public foleys::GuiItem
 {
 public:
     FOLEYS_DECLARE_GUI_FACTORY (PingPongTvItem)
@@ -199,7 +216,7 @@ public:
             {"PingPongTv-background", PingPongTv::backgroundColourId},
             {"PingPongTv-draw", PingPongTv::drawColourId},
             {"PingPongTv-fill", PingPongTv::fillColourId} });
-                startTimerHz(30);
+                // startTimerHz(30);
 
         addAndMakeVisible (PingPongTv);
     }
@@ -242,6 +259,14 @@ public:
     }
 
 private:
+    // void timerCallback() override
+    // {
+    //     // repaint();
+    //    configNode.setProperty("width",  PingPongTv.getWidth(),nullptr);
+    //    configNode.setProperty("pan",  PingPongTv.getPan(),nullptr);
+    //    configNode.setProperty("manualPan",  PingPongTv.getManualPan(),nullptr);
+
+    // }
     PingPongTv PingPongTv;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PingPongTvItem)
