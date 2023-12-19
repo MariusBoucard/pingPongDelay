@@ -86,6 +86,24 @@ rightPlayerPosition.x = getLocalBounds().getX()+getWidth()*7/8 - getWidth()/10;
         rightPlayerPosition.height = getHeight()/1.3;
         // draw player 2
         g.drawImage(rightPlayer, rightPlayerPosition.x, rightPlayerPosition.y, rightPlayerPosition.width, rightPlayerPosition.height, 0, 0, rightPlayer.getWidth(), rightPlayer.getHeight());
+   
+   
+   
+          // Convert the values to strings
+            juce::String panStr = "Pan: " + juce::String(pan);
+            juce::String widthStr = "Width: " + juce::String(width);
+            juce::String manualPanStr = "Manual Pan: " + (manualPan ? juce::String("True") : juce::String("False"));
+
+            // Calculate the position for the text
+            int textHeight = 20;  // Adjust as needed
+            int textY = getHeight() - textHeight;
+
+            // Draw the text
+            g.setColour(juce::Colours::white);  // Set the text color
+            g.drawText(panStr, 0, textY, getWidth(), textHeight, juce::Justification::left);
+    g.drawText(widthStr, 0, textY - textHeight, getWidth(), textHeight, juce::Justification::left);
+    g.drawText(manualPanStr, 0, textY - 2 * textHeight, getWidth(), textHeight, juce::Justification::left);
+   
     }
 
 
@@ -107,37 +125,40 @@ rightPlayerPosition.x = getLocalBounds().getX()+getWidth()*7/8 - getWidth()/10;
        
     }
 
-    // Getter for pan
-float getPan() const
-{
-    return pan;
-}
+/*
+Les getters foutent la merde !!
+*/
+//     // Getter for pan
+// float getPan() const
+// {
+//     return pan;
+// }
 
-// Setter for pan
+// // Setter for pan
 void setPan(float newPan)
 {
     pan = newPan;
 }
 
-// Getter for width
-float getWidth() const
-{
-    return width;
-}
+// // Getter for width
+// float getWidth() const
+// {
+//     return width;
+// }
 
-// Setter for width
+// // Setter for width
 void setWidth(float newWidth)
 {
     width = newWidth;
 }
 
-// Getter for manualPan
-bool getManualPan() const
-{
-    return manualPan;
-}
+// // Getter for manualPan
+// bool getManualPan() const
+// {
+//     return manualPan;
+// }
 
-// Setter for manualPan
+// // Setter for manualPan
 void setManualPan(bool newManualPan)
 {
     manualPan = newManualPan;
@@ -187,7 +208,8 @@ struct imagePosition {
 };
 
 // This class is creating and configuring your custom component
-class PingPongTvItem : public foleys::GuiItem, juce::Timer
+class PingPongTvItem : public foleys::GuiItem
+ , juce::Timer
 {
 public:
     FOLEYS_DECLARE_GUI_FACTORY (PingPongTvItem)
@@ -199,7 +221,7 @@ public:
             {"PingPongTv-background", PingPongTv::backgroundColourId},
             {"PingPongTv-draw", PingPongTv::drawColourId},
             {"PingPongTv-fill", PingPongTv::fillColourId} });
-                startTimerHz(30);
+                // startTimerHz(30);
 
         addAndMakeVisible (PingPongTv);
     }
@@ -240,7 +262,11 @@ public:
     {
         return &PingPongTv;
     }
+    void timerCallback() override
+    {
+        repaint();
 
+    }
 private:
     PingPongTv PingPongTv;
 
