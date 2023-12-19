@@ -117,13 +117,13 @@ public:
         else if (parameters.panType == "Sinus")
         {
             // double delta = std::fmod(((parameters.pingPongTime / 1000.0f)) * 0.5f + parameters.timeSecond, (parameters.pingPongTime / 1000.0f)) / (parameters.pingPongTime / 1000.0f);
-            pan = std::sin(delta * 2.0f * juce::MathConstants<float>::pi);
+            pan = std::sin(delta * juce::MathConstants<float>::twoPi);
         }
         else if (parameters.panType == "MadSin")
         {
             // VERSION SIN RANDOM
             // TODO EXOTIC THING
-            pan = std::sin(parameters.timeSecond * 2.0f * juce::MathConstants<float>::pi);
+            pan = std::sin(parameters.timeSecond * juce::MathConstants<float>::twoPi);
         }
 
         if (parameters.revertPan == 1)

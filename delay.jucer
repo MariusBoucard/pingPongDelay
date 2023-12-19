@@ -6,9 +6,17 @@
               companyName="Fulgurance" pluginVST3Category="Fx" pluginCode="Dppj"
               pluginFormats="buildStandalone">
   <MAINGROUP id="oXUuYS" name="PingPongDelay">
-    <GROUP id="{B89B3AD5-672E-35AE-9240-8A0B1C0D04FE}" name="New Group"/>
-    <GROUP id="{0F9FA3F7-84DA-F429-6784-0B979A73E54A}" name="New Group"/>
     <GROUP id="{DD661678-B72A-E686-D3DB-3AABD9675267}" name="Source">
+      <GROUP id="{2ED99953-47C5-15D8-C258-6A901EEDB7E1}" name="assets">
+        <GROUP id="{061FCDA8-725C-5170-AE0A-24B6BE7DAA47}" name="pingPongImages">
+          <FILE id="qClhaX" name="ball.png" compile="0" resource="1" file="Source/assets/pingPongImages/ball.png"/>
+          <FILE id="cqVrlr" name="leftplayer.png" compile="0" resource="1" file="Source/assets/pingPongImages/leftplayer.png"/>
+          <FILE id="JF2EP7" name="pingpongtable.png" compile="0" resource="1"
+                file="Source/assets/pingPongImages/pingpongtable.png"/>
+          <FILE id="OWWGJL" name="referee.png" compile="0" resource="1" file="Source/assets/pingPongImages/referee.png"/>
+          <FILE id="JCVeZM" name="rightplayer.png" compile="0" resource="1" file="Source/assets/pingPongImages/rightplayer.png"/>
+        </GROUP>
+      </GROUP>
       <GROUP id="{A120B107-B906-8CFF-89D0-9224CEBE0558}" name="service">
         <FILE id="vaX6fi" name="PanComputing.h" compile="0" resource="0" file="Source/service/PanComputing.h"/>
       </GROUP>
@@ -16,6 +24,7 @@
         <FILE id="rIhsEP" name="FanComponent.h" compile="0" resource="0" file="Source/Components/FanComponent.h"/>
         <FILE id="DHdYbf" name="LissajourComponent.h" compile="0" resource="0"
               file="Source/Components/LissajourComponent.h"/>
+        <FILE id="QM2FHw" name="PingPongTv.h" compile="0" resource="0" file="Source/Components/PingPongTv.h"/>
       </GROUP>
       <GROUP id="{D00F6FCC-4839-9728-514E-A021911933BC}" name="audioGraph">
         <GROUP id="{510BC08D-9381-AAF4-6086-89637514B95F}" name="nodes">
