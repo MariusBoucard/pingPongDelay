@@ -13,7 +13,6 @@ JuceLibraryCode/
 *.intermediate
 *.ipa
 *.plist
-*.png
 *.svg
 
 # Visual Studio cache and build directories
