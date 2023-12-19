@@ -230,7 +230,7 @@ public:
         std::vector<foleys::SettableProperty> newProperties;
 
         newProperties.push_back(
-            {configNode, "width", foleys::SettableProperty::Number, 1.0f, {}}
+            {configNode, "widthComponent", foleys::SettableProperty::Number, 0.0f, {}}
             );
                   newProperties.push_back(
             {configNode, "pan", foleys::SettableProperty::Number, 0.0f, {}}
@@ -247,7 +247,7 @@ public:
     // Override update() to set the values to your custom component
     void update() override
     {
-        auto width = getProperty("width");
+        auto width = getProperty("widthComponent");
         auto pan = getProperty("pan");
         auto manualPan = getProperty("manualPan");
         PingPongTv.setWidth(width);
@@ -264,7 +264,7 @@ public:
     void timerCallback() override
     {
         repaint();
-
+      //  update();
     }
 private:
     // void timerCallback() override
