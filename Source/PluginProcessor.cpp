@@ -270,6 +270,17 @@ void DelayAudioProcessor::handleAsyncUpdate()
     {
         std::cout << "  slider not found: " << pendingSliderID << std::endl;
     }
+
+            // Update the factor of fanComponent with the value of width
+        // juce::String fanCompID = "pingPongTv";
+        // auto fanComp = findChildWithProperty(magicState.getGuiTree(), "id", fanCompID);
+
+        // // -> Binding slider to component
+        //   fanComp.setProperty("width", (double)(*parameters.getRawParameterValue("width")),nullptr);
+
+    //    // -> Binding component to slider
+        // juce::var factor_gui_value=  fanComp.getPropertyAsValue("width",nullptr);
+        // parameters.getParameterAsValue("width") = factor_gui_value;
 }
 
 DelayAudioProcessor::~DelayAudioProcessor()
