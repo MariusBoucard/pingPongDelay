@@ -61,15 +61,8 @@ public:
     void paint (juce::Graphics& g) override
     {
 
-        // draw background
-       // g.fillAll (findColour (backgroundColourId));
         
-        // draw pingpong
-        
-        //std::cout << indice;
-        
-   // draw background
-    // g.fillAll (findColour (backgroundColourId));
+    g.fillAll (findColour (backgroundColourId));
       refereePosition.x = getLocalBounds().getX()+getWidth()/2 - getWidth()/20;
         refereePosition.y =  getLocalBounds().getY()    + getHeight()/4;
         refereePosition.width = getWidth()/10;
@@ -113,6 +106,42 @@ rightPlayerPosition.x = getLocalBounds().getX()+getWidth()*7/8 - getWidth()/10;
         refereePosition.height = getHeight();
        
     }
+
+    // Getter for pan
+float getPan() const
+{
+    return pan;
+}
+
+// Setter for pan
+void setPan(float newPan)
+{
+    pan = newPan;
+}
+
+// Getter for width
+float getWidth() const
+{
+    return width;
+}
+
+// Setter for width
+void setWidth(float newWidth)
+{
+    width = newWidth;
+}
+
+// Getter for manualPan
+bool getManualPan() const
+{
+    return manualPan;
+}
+
+// Setter for manualPan
+void setManualPan(bool newManualPan)
+{
+    manualPan = newManualPan;
+}
 private:
 struct imagePosition {
     int x;
@@ -132,11 +161,7 @@ struct imagePosition {
     void timerCallback() override
     {
         repaint();
-        indice += 1;
-        if (indice >= 59)
-        {
-            indice =0;
-        }
+
     }
      juce::Image ball;
      juce::Image leftPlayer;
@@ -155,13 +180,14 @@ struct imagePosition {
 
         // We could implement a game with state every time you stop the playback and points
 
-    juce::Array<juce::Image> images;
-    int indice = 0;
+    int indicePlayerLeft = 0;
+    int indicePlayerRight = 0;
+   std:: string selectedFunction = "Linear";
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PingPongTv)
 };
 
 // This class is creating and configuring your custom component
-class PingPongTvItem : public foleys::GuiItem
+class PingPongTvItem : public foleys::GuiItem, juce::Timer
 {
 public:
     FOLEYS_DECLARE_GUI_FACTORY (PingPongTvItem)
@@ -173,15 +199,41 @@ public:
             {"PingPongTv-background", PingPongTv::backgroundColourId},
             {"PingPongTv-draw", PingPongTv::drawColourId},
             {"PingPongTv-fill", PingPongTv::fillColourId} });
+                startTimerHz(30);
 
         addAndMakeVisible (PingPongTv);
     }
 
-    
+        std::vector<foleys::SettableProperty> getSettableProperties() const override
+    {
+        std::vector<foleys::SettableProperty> newProperties;
+
+        newProperties.push_back(
+            {configNode, "width", foleys::SettableProperty::Number, 1.0f, {}}
+            );
+                  newProperties.push_back(
+            {configNode, "pan", foleys::SettableProperty::Number, 0.0f, {}}
+            ); 
+       newProperties.push_back(
+            {configNode, "manualPan", foleys::SettableProperty::Toggle, false, {}}
+            ); 
+  
+        return newProperties;
+    }
+
+    // TODO GET PARAMETERS
 
     // Override update() to set the values to your custom component
     void update() override
     {
+        auto width = getProperty("width");
+        auto pan = getProperty("pan");
+        auto manualPan = getProperty("manualPan");
+        PingPongTv.setWidth(width);
+        PingPongTv.setPan(pan);
+        PingPongTv.setManualPan(manualPan);
+        
+        // TODO : Set parameters
     }
 
     juce::Component* getWrappedComponent() override

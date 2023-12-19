@@ -25,7 +25,7 @@ public:
 
     void setFactor(float f)
     {
-        factor = 0.0f;
+        factor = f;
     }
     float getFactor()
     {
@@ -47,6 +47,7 @@ public:
         {
             factor = 1.0f;
         }
+
         repaint();
     }
 
@@ -89,7 +90,8 @@ private:
 };
 
 // This class is creating and configuring your custom component
-class FanItem : public foleys::GuiItem
+class FanItem : public foleys::GuiItem,            private juce::Timer
+
 {
 public:
     FOLEYS_DECLARE_GUI_FACTORY(FanItem)
@@ -101,8 +103,10 @@ public:
         setColourTranslation({{"lissajour-background", Fan::backgroundColourId},
                               {"lissajour-draw", Fan::drawColourId},
                               {"lissajour-fill", Fan::fillColourId}});
+        startTimerHz(30);
 
         addAndMakeVisible(fan);
+
     }
     void setFactor(float f)
     {
@@ -127,8 +131,9 @@ public:
     // Override update() to set the values to your custom component
     void update() override  
     {
-        auto factor = getProperty("factor");
-        fan.setFactor(factor);
+     
+         auto factor = getProperty("factor");
+     fan.setFactor(factor);
     }
 
 
@@ -138,6 +143,12 @@ public:
     }
 
 private:
+    void timerCallback() override
+    {
+         std::cout<<"update"<<std::endl;
+        std::cout<<fan.getFactor() <<std::endl;
+       configNode.setProperty("factor",  fan.getFactor(),nullptr);
+    }
     Fan fan;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(FanItem)
