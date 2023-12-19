@@ -271,13 +271,25 @@ void DelayAudioProcessor::handleAsyncUpdate()
         std::cout << "  slider not found: " << pendingSliderID << std::endl;
     }
 
+
             // Update the factor of fanComponent with the value of width
-        // juce::String fanCompID = "pingPongTv";
-        // auto fanComp = findChildWithProperty(magicState.getGuiTree(), "id", fanCompID);
+         juce::String fanCompID = "pingPongTv";
+         auto fanComp = findChildWithProperty(magicState.getGuiTree(), "id", fanCompID);
 
         // // -> Binding slider to component
         //   fanComp.setProperty("width", (double)(*parameters.getRawParameterValue("width")),nullptr);
+    if(fanComp.isValid())
+    {
+        // -> Binding slider to component
+        fanComp.setProperty("widthComponent", (double)(*parameters.getRawParameterValue("width")),nullptr);
+        fanComp.setProperty("pan", pan,nullptr);
+        fanComp.setProperty("manualPan", manualPan,nullptr);
 
+    }
+    else
+    {
+        std::cout << "  fanComp not found: " << fanCompID << std::endl;
+    }
     //    // -> Binding component to slider
         // juce::var factor_gui_value=  fanComp.getPropertyAsValue("width",nullptr);
         // parameters.getParameterAsValue("width") = factor_gui_value;
@@ -367,6 +379,8 @@ void DelayAudioProcessor::parameterChanged(const juce::String &parameterID, floa
     if (parameterID == "width")
     {
         updateDelayParameters();
+            triggerAsyncUpdate();
+
     }
     if (parameterID == "gain")
     {
@@ -418,10 +432,14 @@ void DelayAudioProcessor::parameterChanged(const juce::String &parameterID, floa
     if (parameterID == "pan")
     {
         updateDelayParameters();
+            triggerAsyncUpdate();
+
     }
     if (parameterID == "manualPan")
     {
         updateDelayParameters();
+            triggerAsyncUpdate();
+
     }
     if (parameterID == "revertpan")
     {
