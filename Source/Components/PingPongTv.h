@@ -92,6 +92,12 @@ public:
         // draw player 2
         g.drawImage(rightPlayer, rightPlayerPosition.x, rightPlayerPosition.y, rightPlayerPosition.width, rightPlayerPosition.height, 0, 0, rightPlayer.getWidth(), rightPlayer.getHeight());
    
+        // draw ball
+        setBallPosition();
+        ballPosition.y =  getLocalBounds().getY()    + getHeight()/3 - getHeight()/20;
+        ballPosition.width = getWidth()/10;
+        ballPosition.height = getHeight()/10;
+        g.drawImage(ball, ballPosition.x, ballPosition.y, ballPosition.width, ballPosition.height, 0, 0, ball.getWidth(), ball.getHeight());
    
    
           // Convert the values to strings
@@ -117,15 +123,20 @@ public:
 
         leftPlayerPosition.x = middleX - maxDistMid*width;
         rightPlayerPosition.x = middleX + maxDistMid*width - rightPlayerPosition.width;
-        // TODO : Set player position
     }
     void setRefereePosition(){
         float middleX = getWidth()/2;
         float maxDistMid = middleX*0.9;
 
         refereePosition.x = middleX + pan*maxDistMid - refereePosition.width/2;
-        // TODO : Set player position
     }
+    void setBallPosition(){
+        float middleX = getWidth()/2;
+        float maxDistMid = middleX*0.9;
+
+        ballPosition.x = middleX + pan*maxDistMid - ballPosition.width/2;
+    }
+
     void resized() override
     {
         // This is called when the component is resized.
