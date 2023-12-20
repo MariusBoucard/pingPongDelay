@@ -44,6 +44,8 @@
         <FILE id="PVvOqt" name="HorizontalLineSource.h" compile="0" resource="0"
               file="Source/resources/HorizontalLineSource.h"/>
         <FILE id="hhoTwm" name="magictest.xml" compile="0" resource="1" file="Source/resources/magictest.xml"/>
+        <FILE id="nPVkeh" name="pingPongTemplate.xml" compile="0" resource="1"
+              file="Source/resources/pingPongTemplate.xml"/>
         <FILE id="lbO8Tr" name="space.jpg" compile="0" resource="1" file="Source/resources/space.jpg"/>
         <FILE id="tz13Gn" name="ThreasholdLineSource.h" compile="0" resource="0"
               file="Source/resources/ThreasholdLineSource.h"/>

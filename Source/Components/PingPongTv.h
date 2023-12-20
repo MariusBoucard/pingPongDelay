@@ -60,27 +60,32 @@ public:
 
     void paint (juce::Graphics& g) override
     {
+        bounds = getLocalBounds();
+        widthBounds = bounds.getWidth();
+        heightBounds = bounds.getHeight();
 
-        
-    // g.fillAll (findColour (backgroundColourId));
-      refereePosition.x = getLocalBounds().getX()+getWidth()/2 - getWidth()/20;
+        setPlayerPosition();
+
+       if(manualPan){
+        setRefereePosition();
         refereePosition.y =  getLocalBounds().getY()    + getHeight()/4;
         refereePosition.width = getWidth()/10;
         refereePosition.height = getHeight()/1.3;
-       
         g.drawImage(referee, refereePosition.x, refereePosition.y, refereePosition.width, refereePosition.height, 0, 0, referee.getWidth(), referee.getHeight());
+       }
+       
        g.drawImage(pingPongTable, getLocalBounds().getX(), getLocalBounds().getY()+20, getWidth(), getHeight(),0,0, pingPongTable.getWidth(),pingPongTable.getHeight());
 
         // draw referee      
 
-        leftPlayerPosition.x = getLocalBounds().getX()+getWidth()/8;
+        // leftPlayerPosition.x = getLocalBounds().getX()+getWidth()/8;
         leftPlayerPosition.y =  getLocalBounds().getY()    + getHeight()/4;
         leftPlayerPosition.width = getWidth()/10;
         leftPlayerPosition.height = getHeight()/1.3;
         // draw player 1
         g.drawImage(leftPlayer, leftPlayerPosition.x, leftPlayerPosition.y, leftPlayerPosition.width, leftPlayerPosition.height, 0, 0, leftPlayer.getWidth(), leftPlayer.getHeight());
 
-rightPlayerPosition.x = getLocalBounds().getX()+getWidth()*7/8 - getWidth()/10;
+// rightPlayerPosition.x = getLocalBounds().getX()+getWidth()*7/8 - getWidth()/10;
         rightPlayerPosition.y =  getLocalBounds().getY()    + getHeight()/4;
         rightPlayerPosition.width = getWidth()/10;
         rightPlayerPosition.height = getHeight()/1.3;
@@ -106,7 +111,21 @@ rightPlayerPosition.x = getLocalBounds().getX()+getWidth()*7/8 - getWidth()/10;
    
     }
 
+    void setPlayerPosition(){
+        float middleX = getWidth()/2;
+        float maxDistMid = middleX*0.9;
 
+        leftPlayerPosition.x = middleX - maxDistMid*width;
+        rightPlayerPosition.x = middleX + maxDistMid*width - rightPlayerPosition.width;
+        // TODO : Set player position
+    }
+    void setRefereePosition(){
+        float middleX = getWidth()/2;
+        float maxDistMid = middleX*0.9;
+
+        refereePosition.x = middleX + pan*maxDistMid - refereePosition.width/2;
+        // TODO : Set player position
+    }
     void resized() override
     {
         // This is called when the component is resized.
@@ -164,6 +183,11 @@ void setManualPan(bool newManualPan)
     manualPan = newManualPan;
 }
 private:
+
+juce::Rectangle<int> bounds;
+int widthBounds;
+int heightBounds;
+
 struct imagePosition {
     int x;
     int y;

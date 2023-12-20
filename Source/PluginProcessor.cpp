@@ -61,12 +61,12 @@ DelayAudioProcessor::DelayAudioProcessor()
     auto file = juce::File::getSpecialLocation(juce::File::currentApplicationFile)
                     .getChildFile("Contents")
                     .getChildFile("resources")
-                    .getChildFile("magictest.xml");
+                    .getChildFile("pingPongTemplate.xml");
 
     if (file.existsAsFile())
         magicState.setGuiValueTree(file);
     else
-        magicState.setGuiValueTree(BinaryData::magictest_xml, BinaryData::magictest_xmlSize);
+        magicState.setGuiValueTree(BinaryData::pingPongTemplate_xml, BinaryData::pingPongTemplate_xmlSize);
     analyser = magicState.createAndAddObject<foleys::MagicAnalyser>("input");
     analyserOutput = magicState.createAndAddObject<foleys::MagicAnalyser>("output");
     magicState.setPlayheadUpdateFrequency(30);
@@ -166,24 +166,12 @@ void DelayAudioProcessor::connectNodes()
     // Add the processor to the graph and get the node
     auto outputNode = audioGraph.addNode(std::move(outputProcessor));
 
-    // Connect the input to the first node
-    if (inputNode != nullptr && gainNode != nullptr)
+    if (delayNode != nullptr && inputNode != nullptr)
     {
         for (int channel = 0; channel < getTotalNumInputChannels(); ++channel)
         {
             juce::AudioProcessorGraph::Connection connection;
             connection.source = {inputNode->nodeID, channel};
-            connection.destination = {gainNode->nodeID, channel};
-            audioGraph.addConnection(connection);
-        }
-    }
-    // Connect the last node to the output
-    if (delayNode != nullptr && gainNode != nullptr)
-    {
-        for (int channel = 0; channel < getTotalNumInputChannels(); ++channel)
-        {
-            juce::AudioProcessorGraph::Connection connection;
-            connection.source = {gainNode->nodeID, channel};
             connection.destination = {delayNode->nodeID, channel};
 
             audioGraph.addConnection(connection);
@@ -271,28 +259,26 @@ void DelayAudioProcessor::handleAsyncUpdate()
         std::cout << "  slider not found: " << pendingSliderID << std::endl;
     }
 
+    // Update the factor of fanComponent with the value of width
+    juce::String fanCompID = "pingPongTv";
+    auto fanComp = findChildWithProperty(magicState.getGuiTree(), "id", fanCompID);
 
-            // Update the factor of fanComponent with the value of width
-         juce::String fanCompID = "pingPongTv";
-         auto fanComp = findChildWithProperty(magicState.getGuiTree(), "id", fanCompID);
-
-        // // -> Binding slider to component
-        //   fanComp.setProperty("width", (double)(*parameters.getRawParameterValue("width")),nullptr);
-    if(fanComp.isValid())
+    // // -> Binding slider to component
+    //   fanComp.setProperty("width", (double)(*parameters.getRawParameterValue("width")),nullptr);
+    if (fanComp.isValid())
     {
         // -> Binding slider to component
-        fanComp.setProperty("widthComponent", (double)(*parameters.getRawParameterValue("width")),nullptr);
-        fanComp.setProperty("pan", pan,nullptr);
-        fanComp.setProperty("manualPan", manualPan,nullptr);
-
+        fanComp.setProperty("widthComponent", (double)(*parameters.getRawParameterValue("width")), nullptr);
+        fanComp.setProperty("pan", pan, nullptr);
+        fanComp.setProperty("manualPan", manualPan, nullptr);
     }
     else
     {
         std::cout << "  fanComp not found: " << fanCompID << std::endl;
     }
     //    // -> Binding component to slider
-        // juce::var factor_gui_value=  fanComp.getPropertyAsValue("width",nullptr);
-        // parameters.getParameterAsValue("width") = factor_gui_value;
+    // juce::var factor_gui_value=  fanComp.getPropertyAsValue("width",nullptr);
+    // parameters.getParameterAsValue("width") = factor_gui_value;
 }
 
 DelayAudioProcessor::~DelayAudioProcessor()
@@ -379,8 +365,7 @@ void DelayAudioProcessor::parameterChanged(const juce::String &parameterID, floa
     if (parameterID == "width")
     {
         updateDelayParameters();
-            triggerAsyncUpdate();
-
+        triggerAsyncUpdate();
     }
     if (parameterID == "gain")
     {
@@ -432,14 +417,12 @@ void DelayAudioProcessor::parameterChanged(const juce::String &parameterID, floa
     if (parameterID == "pan")
     {
         updateDelayParameters();
-            triggerAsyncUpdate();
-
+        triggerAsyncUpdate();
     }
     if (parameterID == "manualPan")
     {
         updateDelayParameters();
-            triggerAsyncUpdate();
-
+        triggerAsyncUpdate();
     }
     if (parameterID == "revertpan")
     {
@@ -495,6 +478,8 @@ void DelayAudioProcessor::computePanFromParameters()
         if (delayProcessor != nullptr)
         {
             delayProcessor->setPan(pan);
+            triggerAsyncUpdate();
+            *parameters.getRawParameterValue("pan") = pan;
         }
     }
 }
@@ -619,7 +604,7 @@ void DelayAudioProcessor::updateDelayParameters()
         }
         else
         {
-            
+
             panComputing.setModuloMesure(notesLength);
             delayProcessor->setNotesLength(notesLength, bpm);
         }
