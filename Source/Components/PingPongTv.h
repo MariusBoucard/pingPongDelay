@@ -134,7 +134,7 @@ public:
         float middleX = getWidth()/2;
         float maxDistMid = middleX*0.9;
 
-        ballPosition.x = middleX + pan*maxDistMid - ballPosition.width/2;
+        ballPosition.x = middleX + pan*maxDistMid*width - ballPosition.width/2;
     }
 
     void resized() override

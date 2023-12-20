@@ -76,12 +76,11 @@ public:
   void parameterChanged(const juce::String &parameterID, float newValue) override;
 
 private:
-private:
-
-
-  PanComputing::ParametersPan _mParametersPan;
 
   juce::AudioProcessorGraph audioGraph;
+  PanComputing panComputing;
+  PanComputing::ParametersPan _mParametersPan;
+
 
   juce::AudioProcessorGraph::Node::Ptr delayNode;
   juce::AudioProcessorGraph::Node::Ptr gainNode;
@@ -90,18 +89,18 @@ private:
   int switchPingPong = 0;
   int switchDelay = 0;
   float inputVolume = 0.0f;
-  foleys::MagicPlotSource *analyser = nullptr;
-  foleys::MagicPlotSource *analyserOutput = nullptr;
   float pan = 0.0f;
   int manualPan = 0;
-  std::atomic<double> widthComponent;
   float bpm = 100.0f;
+
+  juce::AudioPlayHead* playHead = nullptr;
+
+  foleys::MagicPlotSource *analyser = nullptr;
+  foleys::MagicPlotSource *analyserOutput = nullptr;
+  
   juce::String pendingSliderID;
   juce::String pendingParameterName;
 
-  PanComputing panComputing;
-
-  juce::AudioPlayHead* playHead = nullptr;
   //==============================================================================
   JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(DelayAudioProcessor)
 };
