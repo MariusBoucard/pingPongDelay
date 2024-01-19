@@ -91,6 +91,7 @@ private:
   float inputVolume = 0.0f;
   float pan = 0.0f;
   int manualPan = 0;
+  bool manualPanBool = false;
   float bpm = 100.0f;
 
   juce::AudioPlayHead* playHead = nullptr;

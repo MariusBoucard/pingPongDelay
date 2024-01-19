@@ -272,7 +272,10 @@ public:
             ); 
        newProperties.push_back(
             {configNode, "manualPan", foleys::SettableProperty::Toggle, false, {}}
-            ); 
+            );
+        newProperties.push_back(
+             {configNode, "manualPanBool", foleys::SettableProperty::Toggle, false, {}}
+             );
   
         return newProperties;
     }
@@ -284,7 +287,7 @@ public:
     {
         auto width = getProperty("widthComponent");
         auto pan = getProperty("pan");
-        auto manualPan = getProperty("manualPan");
+        auto manualPan = getProperty("manualPanBool");
         PingPongTv.setWidth(width);
         PingPongTv.setPan(pan);
         PingPongTv.setManualPan(manualPan);

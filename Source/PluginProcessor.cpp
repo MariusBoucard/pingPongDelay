@@ -14,6 +14,7 @@
 #include "audioGraph/nodes/DryWetMixer.h"
 #include "Components/LissajourComponent.h"
 #include "Components/PingPongTv.h"
+#include "LookAndFeels/WoodVintageLookAndFeel.h"
 //==============================================================================
 
 juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
@@ -38,6 +39,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
 
     layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"pan", 1}, "Pan", -1.0f, 1.0f, 0.0f));
     layout.add(std::make_unique<juce::AudioParameterInt>(juce::ParameterID{"manualPan", 1}, "Manual Panning", 0, 1, 1));
+    layout.add(std::make_unique<juce::AudioParameterBool>(juce::ParameterID{"manualPanBool", 1}, "Manual Panning Bool", false));
     return layout;
 }
 
@@ -66,7 +68,7 @@ DelayAudioProcessor::DelayAudioProcessor()
     if (file.existsAsFile())
         magicState.setGuiValueTree(file);
     else
-        magicState.setGuiValueTree(BinaryData::pingPongTemplate_xml, BinaryData::pingPongTemplate_xmlSize);
+        magicState.setGuiValueTree(BinaryData::magic_xml, BinaryData::magic_xmlSize);
     analyser = magicState.createAndAddObject<foleys::MagicAnalyser>("input");
     analyserOutput = magicState.createAndAddObject<foleys::MagicAnalyser>("output");
     magicState.setPlayheadUpdateFrequency(30);
@@ -94,6 +96,7 @@ void DelayAudioProcessor::addAudioListener()
     parameters.addParameterListener("mix", this);
     parameters.addParameterListener("pan", this);
     parameters.addParameterListener("manualPan", this);
+    parameters.addParameterListener("manualPanBool", this);
     parameters.addParameterListener("offset", this);
     parameters.addParameterListener("revertpan", this);
 }
@@ -271,6 +274,7 @@ void DelayAudioProcessor::handleAsyncUpdate()
         fanComp.setProperty("widthComponent", (double)(*parameters.getRawParameterValue("width")), nullptr);
         fanComp.setProperty("pan", pan, nullptr);
         fanComp.setProperty("manualPan", manualPan, nullptr);
+        fanComp.setProperty("manualPanBool", manualPanBool, nullptr);
     }
     else
     {
@@ -294,6 +298,7 @@ void DelayAudioProcessor::initialiseBuilder(foleys::MagicGUIBuilder &builder)
 
     builder.registerLookAndFeel("slide", std::make_unique<LookAndFeelFirst>());
     builder.registerLookAndFeel("threshold", std::make_unique<LookAndFeelThreshold>());
+    builder.registerLookAndFeel("woodVintage", std::make_unique<WoodVintageLookAndFeel>());
 }
 
 //==============================================================================
@@ -424,6 +429,11 @@ void DelayAudioProcessor::parameterChanged(const juce::String &parameterID, floa
         updateDelayParameters();
         triggerAsyncUpdate();
     }
+    if (parameterID == "manualPanBool")
+    {
+        updateDelayParameters();
+        triggerAsyncUpdate();
+    }
     if (parameterID == "revertpan")
     {
         _mParametersPan.revertPan = *parameters.getRawParameterValue("revertpan");
@@ -515,7 +525,7 @@ void DelayAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer, juce::M
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear(i, 0, buffer.getNumSamples());
 
-    if (manualPan == 0)
+    if (not manualPanBool)
     {
         playHead = getPlayHead();
         computePanFromParameters();
@@ -613,8 +623,8 @@ void DelayAudioProcessor::updateDelayParameters()
         delayProcessor->setWidth(width);
     }
 
-    manualPan = *parameters.getRawParameterValue("manualPan");
-    if (manualPan == 1)
+    manualPanBool = *parameters.getRawParameterValue("manualPanBool");
+    if (manualPanBool)
     {
         pan = *parameters.getRawParameterValue("pan");
         delayProcessor->setPan(pan);

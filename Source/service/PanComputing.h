@@ -33,7 +33,7 @@ public:
         bool inTime;
         int revertPan = 0;
     };
-    float PanComputing::computePan(ParametersPan parameters)
+    float computePan(ParametersPan parameters)
     {
 
         // TODO ADD PARAMETER FOR PAN TIME
