@@ -159,7 +159,7 @@ public:
 
             // Calculate the position of the button based on the slider value
             
-            float buttonX = x + sliderPos;
+            float buttonX = x + sliderPos*0.9 -20;
             float buttonY = y;
             //float buttonX = x + sliderPos * (width - buttonImage.getWidth());
             //float buttonY = y + (height - buttonImage.getHeight()) / 2;

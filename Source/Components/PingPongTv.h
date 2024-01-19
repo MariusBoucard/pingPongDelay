@@ -74,7 +74,7 @@ public:
         g.drawImage(referee, refereePosition.x, refereePosition.y, refereePosition.width, refereePosition.height, 0, 0, referee.getWidth(), referee.getHeight());
        }
        
-       g.drawImage(pingPongTable, getLocalBounds().getX(), getLocalBounds().getY()+20, getWidth(), getHeight(),0,0, pingPongTable.getWidth(),pingPongTable.getHeight());
+       g.drawImage(pingPongTable, getLocalBounds().getX()+50, getLocalBounds().getY()+50, getWidth()*0.7, getHeight()*0.7,0,0, pingPongTable.getWidth(),pingPongTable.getHeight());
 
         // draw referee      
 
