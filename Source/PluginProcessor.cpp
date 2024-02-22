@@ -525,7 +525,7 @@ void DelayAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer, juce::M
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear(i, 0, buffer.getNumSamples());
 
-    if (not manualPanBool)
+    if (! manualPanBool)
     {
         playHead = getPlayHead();
         computePanFromParameters();

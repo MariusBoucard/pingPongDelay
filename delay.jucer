@@ -4,9 +4,22 @@
               addUsingNamespaceToJuceHeader="0" displaySplashScreen="1" jucerFormatVersion="1"
               pluginName="PingPongDelay" headerPath="&#10;C:\Program\ Files\Faust\include\**&#10;"
               companyName="Fulgurance" pluginVST3Category="Fx" pluginCode="Dppj"
-              pluginFormats="buildVST3">
+              pluginFormats="buildStandalone">
   <MAINGROUP id="oXUuYS" name="PingPongDelay">
     <GROUP id="{DD661678-B72A-E686-D3DB-3AABD9675267}" name="Source">
+      <FILE id="H72cLA" name="magic.xml" compile="0" resource="1" file="Source/magic.xml"/>
+      <GROUP id="{B908832F-1FF2-B05C-3A9A-7E10EDE03053}" name="LookAndFeels">
+        <FILE id="EyRCOh" name="bouledefeu.png" compile="0" resource="1" file="Source/LookAndFeels/bouledefeu.png"/>
+        <FILE id="htzRLB" name="boxWood.jpg" compile="0" resource="1" file="Source/LookAndFeels/boxWood.jpg"/>
+        <FILE id="TpRlht" name="gouvernail.png" compile="0" resource="1" file="Source/LookAndFeels/gouvernail.png"/>
+        <FILE id="wniHsf" name="line.png" compile="0" resource="1" file="Source/LookAndFeels/line.png"/>
+        <FILE id="YA5Dl3" name="sliderbutton.png" compile="0" resource="1"
+              file="Source/LookAndFeels/sliderbutton.png"/>
+        <FILE id="FwdwKG" name="switchOFF.jpeg" compile="0" resource="1" file="Source/LookAndFeels/switchOFF.jpeg"/>
+        <FILE id="kdZzMi" name="switchON.jpeg" compile="0" resource="1" file="Source/LookAndFeels/switchON.jpeg"/>
+        <FILE id="uIl7e2" name="WoodVintageLookAndFeel.h" compile="0" resource="0"
+              file="Source/LookAndFeels/WoodVintageLookAndFeel.h"/>
+      </GROUP>
       <GROUP id="{2ED99953-47C5-15D8-C258-6A901EEDB7E1}" name="assets">
         <GROUP id="{061FCDA8-725C-5170-AE0A-24B6BE7DAA47}" name="pingPongImages">
           <FILE id="qClhaX" name="ball.png" compile="0" resource="1" file="Source/assets/pingPongImages/ball.png"/>
@@ -39,16 +52,30 @@
               file="Source/faustDSP/EchoMonoToStereo.h"/>
       </GROUP>
       <GROUP id="{559436F1-1671-1E40-B396-EEBD0C13A0EE}" name="resources">
+        <FILE id="LixnMY" name="box rect old.jpg" compile="0" resource="1"
+              file="Source/resources/box rect old.jpg"/>
+        <FILE id="G5yPkE" name="box rect remplie.png" compile="0" resource="1"
+              file="Source/resources/box rect remplie.png"/>
+        <FILE id="MxWTxE" name="box rect.jpg" compile="0" resource="1" file="Source/resources/box rect.jpg"/>
+        <FILE id="T40AYH" name="box.jpg" compile="0" resource="1" file="Source/resources/box.jpg"/>
         <FILE id="jfQvQ9" name="CompressionValue.h" compile="0" resource="0"
               file="Source/resources/CompressionValue.h"/>
         <FILE id="PVvOqt" name="HorizontalLineSource.h" compile="0" resource="0"
               file="Source/resources/HorizontalLineSource.h"/>
+        <FILE id="PCFCZq" name="LookAndFeelFirst.h" compile="0" resource="0"
+              file="Source/resources/LookAndFeelFirst.h"/>
+        <FILE id="x8y982" name="LookAndFeelThreshold.h" compile="0" resource="0"
+              file="Source/resources/LookAndFeelThreshold.h"/>
         <FILE id="hhoTwm" name="magictest.xml" compile="0" resource="1" file="Source/resources/magictest.xml"/>
         <FILE id="nPVkeh" name="pingPongTemplate.xml" compile="0" resource="1"
               file="Source/resources/pingPongTemplate.xml"/>
+        <FILE id="vT1xRO" name="plantes.png" compile="0" resource="1" file="Source/resources/plantes.png"/>
+        <FILE id="XEggxz" name="planteshorizontales.png" compile="0" resource="1"
+              file="Source/resources/planteshorizontales.png"/>
         <FILE id="lbO8Tr" name="space.jpg" compile="0" resource="1" file="Source/resources/space.jpg"/>
         <FILE id="tz13Gn" name="ThreasholdLineSource.h" compile="0" resource="0"
               file="Source/resources/ThreasholdLineSource.h"/>
+        <FILE id="r9zCL8" name="tvscreen.jpg" compile="0" resource="1" file="Source/resources/tvscreen.jpg"/>
       </GROUP>
       <FILE id="F97vnb" name="PluginProcessor.cpp" compile="1" resource="0"
             file="Source/PluginProcessor.cpp"/>
